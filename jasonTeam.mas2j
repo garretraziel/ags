@@ -11,9 +11,9 @@ MAS miners {
         //             3. whether display the gui
 	    
 	agents:
-		aSlow teamxSlow;
-		aMiddle teamxMiddle;
-		aFast teamxFast;
+		aSlow teamFSlow;
+		aMiddle teamFMiddle;
+		aFast teamFFast;
 		bSlow teamySlow;
 		bMiddle teamyMiddle;
 		bFast teamyFast;
