@@ -1,18 +1,22 @@
-+step(0) : true <- ?pos(X1,Y1); ?depot(X2,Y2);
-	?shortest_path(X1,Y1,X2,Y2,[_|T]);
-	+moving_plan(T); +end_plan(X2,Y2); !do_step.
++step(0) : true <- +places_to_visit([[16,16], [6,26], [16,16], [20,0], [1,0]]); do(skip).
 +step(N) : moving_plan(_) <- !do_step.
-+step(N) : end_plan(_) <- -end_plain(_).
++step(N) : end_plan(X,Y) & pos(X,Y) <- -end_plan(_,_); do(skip).
++step(N) : places_to_visit([[X1,Y1]|T]) & pos(X2,Y2) <-
+	.print("dalsi misto");
+	-places_to_visit(_);
+	?shortest_path(X2,Y2,X1,Y1,[_|TP]);
+	.print("cesta spocitana");
+	+moving_plan(TP); +end_plan(X1,Y1);
+	+places_to_visit(T);
+	!do_step.
++step(N) : true <- .print("nevim co mam delat").
 
 +obstacle(X,Y) : true <- +obs(X,Y).
-
-+?pop([[X,Y]|T],T,X,Y).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
 
-+!do_direction_step(X1,Y1) : pos(X1,Y1) <- true.
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 & obstacle(X2-1,Y2) <-
 	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
@@ -32,7 +36,7 @@
 	+moving_plan(T);
 	!do_step.
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 & obstacle(X2,Y2+1) <-
-	?end_plain(X3,Y3);
+	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
 	+moving_plan(T);
@@ -57,6 +61,7 @@
 +?is_coord_in_set(X,Y,[_|R],B) : true <- ?is_coord_in_set(X,Y,R,B).
 
 +?add_north(X,Y,_,_,_,_,_,N,N) : obs(X,Y-1) <- true.
++?add_north(X,Y,_,_,_,_,_,N,N) : Y-1 < 0 <- true.
 +?add_north(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X,Y-1,CLOSED,B);
 	if ( B == true ) {
@@ -69,6 +74,7 @@
 	}.
 
 +?add_east(X,Y,_,_,_,_,_,N,N) : obs(X+1,Y) <- true.
++?add_east(X,Y,_,_,_,_,_,N,N) : grid_size(G1,_) & X+1 >= G1 <- true.
 +?add_east(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X+1,Y,CLOSED,B);
 	if ( B == true ) {
@@ -81,6 +87,7 @@
 	}.
 
 +?add_south(X,Y,_,_,_,_,_,N,N) : obs(X,Y+1) <- true.
++?add_south(X,Y,_,_,_,_,_,N,N) : grid_size(_,G2) & Y+1 >= G2 <- true.
 +?add_south(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X,Y+1,CLOSED,B);
 	if ( B == true ) {
@@ -93,6 +100,7 @@
 	}.
 
 +?add_west(X,Y,_,_,_,_,_,N,N) : obs(X-1,Y) <- true.
++?add_west(X,Y,_,_,_,_,_,N,N) : X-1 < 0 <- true.
 +?add_west(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X-1,Y,CLOSED,B);
 	if ( B == true ) {
