@@ -4,6 +4,8 @@
 +step(N) : moving_plan(_) <- !do_step.
 +step(N) : end_plan(_) <- -end_plain(_).
 
++obstacle(X,Y) : true <- +obs(X,Y).
+
 +?pop([[X,Y]|T],T,X,Y).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
@@ -11,25 +13,25 @@
 	!do_direction_step(X,Y).
 
 +!do_direction_step(X1,Y1) : pos(X1,Y1) <- true.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 & obstacle(X2-1,Y) <-
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 & obstacle(X2-1,Y2) <-
 	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
 	+moving_plan(T);
 	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 & obstacle(X2,Y-1) <-
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 & obstacle(X2,Y2-1) <-
 	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
 	+moving_plan(T);
 	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 & obstacle(X2+1,Y) <-
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 & obstacle(X2+1,Y2) <-
 	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
 	+moving_plan(T);
 	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 & obstacle(X2,Y+1) <-
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 & obstacle(X2,Y2+1) <-
 	?end_plain(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
@@ -42,7 +44,8 @@
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
 
-+?pop_lowest_score([H|T], LOWEST, REST) : true <- ?pop_lowest_score_d(H, T, [], LOWEST, REST).
++?pop_lowest_score([H|T], LOWEST, REST) : true <-
+	?pop_lowest_score_d(H, T, [], LOWEST, REST).
 +?pop_lowest_score_d(LOWEST, [], REST, LOWEST, REST).
 +?pop_lowest_score_d([SCORE1|R1], [[SCORE2|R2]|R3], REST_SO_FAR, LOWEST, REST) :
 	SCORE1 < SCORE2 <- ?pop_lowest_score_d([SCORE1|R1], R3, [[SCORE2|R2]|REST_SO_FAR], LOWEST, REST).
@@ -53,7 +56,7 @@
 +?is_coord_in_set(_,_,[],false).
 +?is_coord_in_set(X,Y,[_|R],B) : true <- ?is_coord_in_set(X,Y,R,B).
 
-+?add_north(X,Y,_,_,_,_,_,N,N) : obstacle(X,Y-1) <- true.
++?add_north(X,Y,_,_,_,_,_,N,N) : obs(X,Y-1) <- true.
 +?add_north(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X,Y-1,CLOSED,B);
 	if ( B == true ) {
@@ -65,7 +68,7 @@
 		N2 = [[COST,FROM_BEGIN+1,X,Y-1,PATH]|N1];
 	}.
 
-+?add_east(X,Y,_,_,_,_,_,N,N) : obstacle(X+1,Y) <- true.
++?add_east(X,Y,_,_,_,_,_,N,N) : obs(X+1,Y) <- true.
 +?add_east(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X+1,Y,CLOSED,B);
 	if ( B == true ) {
@@ -77,7 +80,7 @@
 		N2 = [[COST,FROM_BEGIN+1,X+1,Y,PATH]|N1];
 	}.
 
-+?add_south(X,Y,_,_,_,_,_,N,N) : obstacle(X,Y+1) <- true.
++?add_south(X,Y,_,_,_,_,_,N,N) : obs(X,Y+1) <- true.
 +?add_south(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X,Y+1,CLOSED,B);
 	if ( B == true ) {
@@ -89,7 +92,7 @@
 		N2 = [[COST,FROM_BEGIN+1,X,Y+1,PATH]|N1];
 	}.
 
-+?add_west(X,Y,_,_,_,_,_,N,N) : obstacle(X-1,Y) <- true.
++?add_west(X,Y,_,_,_,_,_,N,N) : obs(X-1,Y) <- true.
 +?add_west(X,Y,FROM_BEGIN,Xto,Yto,P1,CLOSED,N1,N2) : true <-
 	?is_coord_in_set(X-1,Y,CLOSED,B);
 	if ( B == true ) {
