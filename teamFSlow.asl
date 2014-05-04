@@ -1,4 +1,5 @@
-+step(0) : true <- +places_to_visit([[16,16], [6,26], [16,16], [20,0], [1,0]]); do(skip).
++step(0) : true <- +places_to_visit([[16,16], [6,26], [16,16], [20,0], [1,0], [16,16], [6,26], [16,16], [20,0], [1,0]]);
+	do(skip).
 +step(N) : moving_plan(_) <- !do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) <- -end_plan(_,_); do(skip).
 +step(N) : places_to_visit([[X1,Y1]|T]) & pos(X2,Y2) <-
@@ -9,33 +10,28 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step.
-+step(N) : true <- .print("nevim co mam delat").
++step(N) : true <- .print("nevim co mam delat"); do(skip).
 
-+obstacle(X,Y) : true <- +obs(X,Y).
++obstacle(X,Y) : true <- +obs(X,Y); !send_all(obs(X,Y)).
++gold(X,Y) : true <- +g(X,Y); !send_all(obs(X,Y)).
++wood(X,Y) : true <- +w(X,Y); !send_all(obs(X,Y)).
+
++!send_all(X) : true <- !send_slow(X); !send_middle(X); !send_fast(X).
++!send_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, tell, X).
++!send_slow(_) : true <- true.
++!send_middle(X) : friend(F) & .substring("Middle", F) <- .send(F, tell, X).
++!send_middle(_) : true <- true.
++!send_fast(X) : firiend(F) & .substring("Fast", F) <- .send(F, tell, X).
++!send_fast(_) : true <- true.
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
++!do_step : true <- do(skip).
 
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 & obstacle(X2-1,Y2) <-
-	?end_plan(X3,Y3);
-	?shortest_path(X2,Y2,X3,Y3,[_|T]);
-	-moving_plan(_);
-	+moving_plan(T);
-	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 & obstacle(X2,Y2-1) <-
-	?end_plan(X3,Y3);
-	?shortest_path(X2,Y2,X3,Y3,[_|T]);
-	-moving_plan(_);
-	+moving_plan(T);
-	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 & obstacle(X2+1,Y2) <-
-	?end_plan(X3,Y3);
-	?shortest_path(X2,Y2,X3,Y3,[_|T]);
-	-moving_plan(_);
-	+moving_plan(T);
-	!do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 & obstacle(X2,Y2+1) <-
++!do_direction_step(X1,Y1) : pos(X2,Y2) & ((X1 < X2 & obstacle(X2-1,Y2)) |
+		(Y1 < Y2 & obstacle(X2,Y2-1)) | (X1 > X2 & obstacle(X2+1,Y2)) |
+		(Y1 > Y2 & obstacle(X2,Y2+1))) <-
 	?end_plan(X3,Y3);
 	?shortest_path(X2,Y2,X3,Y3,[_|T]);
 	-moving_plan(_);
