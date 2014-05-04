@@ -1,4 +1,4 @@
-+step(0) : true <- +places_to_visit([[16,16], [6,26], [16,16], [20,0], [1,0], [16,16], [6,26], [16,16], [20,0], [1,0]]);
++step(0) : true <- +places_to_visit([[6,26], [1,0], [6,26], [1,0]]);
 	do(skip).
 +step(N) : moving_plan(_) <- !do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) <- -end_plan(_,_); do(skip).
@@ -60,103 +60,33 @@
 +?is_coord_in_openset(X,Y,[],false,0).
 +?is_coord_in_openset(X,Y,[_|R],B,C) : true <- ?is_coord_in_openset(X,Y,R,B,C).
 
-+?add_north(X,Y,_,_,_,_,_,_,N,N) : obs(X,Y-1) <- true.
-+?add_north(X,Y,_,_,_,_,_,_,N,N) : Y-1 < 0 <- true.
-+?add_north(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2) : true <-
-	?is_coord_in_set(X,Y-1,CLOSED,B);
++?add_neighbour(X,Y,_,_,_,_,_,_,N,N) : obs(X,Y) | X < 0 | Y < 0
+	| (grid(Xg,Yg) & X >= Xg) | (grid(Xg,Yg) & Y >= Yg) <- true.
++?add_neighbour(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2) : true <-
+	?is_coord_in_set(X,Y,CLOSED,B);
 	if ( B == true ) {
 		N2 = N1;
 	} else {
-		?distance(X,Y-1,Xto,Yto,D);
+		?distance(X,Y,Xto,Yto,D);
 		COST = FROM_BEGIN+1+D;
-		?is_coord_in_openset(X,Y-1,OPEN,B2,C);
+		PATH = [[X,Y]|P1];
+		?is_coord_in_openset(X,Y,OPEN,B2,C);
 		if ( B2 == true ) {
 			if (COST < C) {
-				PATH = [[X,Y-1]|P1];
-				N2 = [[COST,FROM_BEGIN+1,X,Y-1,PATH]|N1];
+				N2 = [[COST,FROM_BEGIN+1,X,Y,PATH]|N1];
 			} else {
 				N2 = N1;
 			}
 		} else {
-			PATH = [[X,Y-1]|P1];
-			N2 = [[COST,FROM_BEGIN+1,X,Y-1,PATH]|N1];
-		}
-	}.
-
-+?add_east(X,Y,_,_,_,_,_,_,N,N) : obs(X+1,Y) <- true.
-+?add_east(X,Y,_,_,_,_,_,_,N,N) : grid_size(G1,_) & X+1 >= G1 <- true.
-+?add_east(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2) : true <-
-	?is_coord_in_set(X+1,Y,CLOSED,B);
-	if ( B == true ) {
-		N2 = N1;
-	} else {
-		?distance(X+1,Y,Xto,Yto,D);
-		COST = FROM_BEGIN+1+D;
-		?is_coord_in_openset(X+1,Y,OPEN,B2,C);
-		if ( B2 == true ) {
-			if (COST < C) {
-				PATH = [[X+1,Y]|P1];
-				N2 = [[COST,FROM_BEGIN+1,X+1,Y,PATH]|N1];
-			} else {
-				N2 = N1;
-			}
-		} else {
-			PATH = [[X+1,Y]|P1];
-			N2 = [[COST,FROM_BEGIN+1,X+1,Y,PATH]|N1];
-		}
-	}.
-
-+?add_south(X,Y,_,_,_,_,_,_,N,N) : obs(X,Y+1) <- true.
-+?add_south(X,Y,_,_,_,_,_,_,N,N) : grid_size(_,G2) & Y+1 >= G2 <- true.
-+?add_south(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2) : true <-
-	?is_coord_in_set(X,Y+1,CLOSED,B);
-	if ( B == true ) {
-		N2 = N1;
-	} else {
-		?distance(X,Y+1,Xto,Yto,D);
-		COST = FROM_BEGIN+1+D;
-		?is_coord_in_openset(X,Y+1,OPEN,B2,C);
-		if ( B2 == true ) {
-			if (COST < C) {
-				PATH = [[X,Y+1]|P1];
-				N2 = [[COST,FROM_BEGIN+1,X,Y+1,PATH]|N1];
-			} else {
-				N2 = N1;
-			}
-		} else {
-			PATH = [[X,Y+1]|P1];
-			N2 = [[COST,FROM_BEGIN+1,X,Y+1,PATH]|N1];
-		}
-	}.
-
-+?add_west(X,Y,_,_,_,_,_,_,N,N) : obs(X-1,Y) <- true.
-+?add_west(X,Y,_,_,_,_,_,_,N,N) : X-1 < 0 <- true.
-+?add_west(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2) : true <-
-	?is_coord_in_set(X-1,Y,CLOSED,B);
-	if ( B == true ) {
-		N2 = N1;
-	} else {
-		?distance(X-1,Y,Xto,Yto,D);
-		COST = FROM_BEGIN+1+D;
-		?is_coord_in_openset(X-1,Y,OPEN,B2,C);
-		if ( B2 == true ) {
-			if (COST < C) {
-				PATH = [[X-1,Y]|P1];
-				N2 = [[COST,FROM_BEGIN+1,X-1,Y,PATH]|N1];
-			} else {
-				N2 = N1;
-			}
-		} else {
-			PATH = [[X-1,Y]|P1];
-			N2 = [[COST,FROM_BEGIN+1,X-1,Y,PATH]|N1];
+			N2 = [[COST,FROM_BEGIN+1,X,Y,PATH]|N1];
 		}
 	}.
 	
 +?neighbours(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N) : true <-
-	?add_north(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,[],N1);
-	?add_east(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2);
-	?add_south(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N2,N3);
-	?add_west(X,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N3,N).
+	?add_neighbour(X,Y-1,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,[],N1);
+	?add_neighbour(X+1,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N1,N2);
+	?add_neighbour(X,Y+1,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N2,N3);
+	?add_neighbour(X-1,Y,FROM_BEGIN,Xto,Yto,P1,OPEN,CLOSED,N3,N).
 
 // reprezentace bude: [SCORE, URAZENA_VZDALENOST, X, Y, [CESTA]]
 
