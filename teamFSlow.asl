@@ -9,16 +9,17 @@
 	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
 	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
 
-+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
+//+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
++step(0) : true <- +places_to_visit([[6,26],[16,16],[6,26],[16,16]]); do(skip).
 +step(N) : have_to_load & pos(X,Y) <- -have_to_load; do(pick); -g(X,Y);
 	?depot(XD,YD); +places_to_visit([[XD,YD]]); +have_to_unload.
 +step(N) : have_to_unload & depot(X,Y) & pos(X,Y) <- -have_to_unload; do(drop).
 +step(N) : moving_plan(_) <- .print("bla2");!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
-	!add_known_path(X2D,Y2D,X1D,Y1D,P);
+	//!add_known_path(X2D,Y2D,X1D,Y1D,P);
 	.reverse(P,PRev);
-	!add_known_path(X1D,Y1D,X2D,Y2D,PRev);
+	//!add_known_path(X1D,Y1D,X2D,Y2D,PRev);
 	-end_plan(_,_); do(skip).
 +step(N) : end_plan(X1,Y1) & pos(X2,Y2) <-
 	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);

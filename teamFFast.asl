@@ -9,13 +9,13 @@
 	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
 	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
 
-+step(0) : true <- +places_to_visit([[1,1], [33,1], [33,4], [1,4], [1,7],
+/*+step(0) : true <- +places_to_visit([[1,1], [33,1], [33,4], [1,4], [1,7],
 	[33,7], [33,10], [1,10], [1,13], [33,13],
 	[33,16],[1,16],[1,19],[33,19],
 	[33,21],[1,21],[1,24],[33,24],
 	[33,27],[1,27],[1,30],[33,30],
 	[33,33],[1,33]]); do(skip); do(skip); do(skip).
-
+*/
 +step(N) : moving_plan(_) <- .print("bla2");!do_step;!do_step;!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
