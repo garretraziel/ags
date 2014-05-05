@@ -1,27 +1,22 @@
-+step(0) : true <- do(skip); do(skip).
++!add_known_path(Xfrom,Yfrom,Xto,Yto,P) : true <-
+	+known_path(Xfrom,Yfrom,Xto,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto-1,P);
+	+known_path(Xfrom,Yfrom,Xto,Yto-1,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
+
++step(0) : true <- +places_to_visit([[1,0]]); do(skip); do(skip).
 +step(N) : moving_plan(_) <- .print("bla2");!do_step;!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
 	.print(P);
-	+known_path(X2D,Y2D,X1D,Y1D,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D-1,P);
-	+known_path(X2D,Y2D,X1D,Y1D-1,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D-1,P);
+	!add_known_path(X2D,Y2D,X1D,Y1D,P);
 	.reverse(P,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D-1,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D-1,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D-1,PRev);
+	!add_known_path(X1D,Y1D,X2D,Y2D,P);
 	-end_plan(_,_); do(skip);do(skip).
 +step(N) : end_plan(X1,Y1) & pos(X2,Y2) <-
 	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
@@ -45,13 +40,15 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step;!do_step.
++step(N) : pos(X,Y) & going(X,Y) & respond(A) <- .send(A,achieve,i_am_there(X,Y)); .print("poslano i am there").
 +step(N) : true <- do(skip); do(skip).
 
 +obstacle(X,Y) : true <- +obs(X,Y); !send_all(obs(X,Y)).
 +gold(X,Y) : true <- +g(X,Y); !send_all(g(X,Y)).
 +wood(X,Y) : true <- +w(X,Y); !send_all(w(X,Y)).
 
-+!please_go(X,Y) <- +places_to_visit([[X,Y]]).
++!please_go(X,Y)[source(A)] <- +places_to_visit([[X,Y]]); +going(X,Y); +respond(A).
++!load_it : true <- do(pick); do(skip); ?depot(XD,YD); +places_to_visit([XD,YD]).
 
 +!send_all(X) : true <- !send_slow(X); !send_middle(X); !send_fast(X).
 +!send_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, tell, X).
@@ -60,6 +57,11 @@
 +!send_middle(_) : true <- true.
 +!send_fast(X) : friend(F) & .substring("Fast", F) <- .send(F, tell, X).
 +!send_fast(_) : true <- true.
+
++!command_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, achieve, X).
++!command_slow(X) : true <- true.
++!command_middle(X) : friend(F) & .substring("Middle", F) <- .send(F, achieve, X).
++!command_middle(X) : true <- true.
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);

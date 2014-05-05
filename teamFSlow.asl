@@ -1,27 +1,20 @@
++!add_known_path(Xfrom,Yfrom,Xto,Yto,P) : true <-
+	+known_path(Xfrom,Yfrom,Xto,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto-1,P);
+	+known_path(Xfrom,Yfrom,Xto,Yto-1,P);
+	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
+	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
+
 +step(0) : true <- +places_to_visit([[6,26],[16,16],[1,0],[5,26],[30,15],[2,12]]); do(skip).
 +step(N) : moving_plan(_) <- .print("bla2");!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
 	.print(P);
-	+known_path(X2D,Y2D,X1D,Y1D,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D-1,P);
-	+known_path(X2D,Y2D,X1D,Y1D-1,P);
-	+known_path(X2D,Y2D,X1D-1,Y1D+1,P);
-	+known_path(X2D,Y2D,X1D+1,Y1D-1,P);
 	.reverse(P,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D-1,PRev);
-	+known_path(X1D,Y1D,X2D,Y2D-1,PRev);
-	+known_path(X1D,Y1D,X2D-1,Y2D+1,PRev);
-	+known_path(X1D,Y1D,X2D+1,Y2D-1,PRev);
 	-end_plan(_,_); do(skip).
 +step(N) : end_plan(X1,Y1) & pos(X2,Y2) <-
 	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
@@ -45,6 +38,7 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step.
++step(N) : is_waiting(X,Y,A) & pos(X,Y) <- .send(A,achieve,load_it); do(pick); ?depot(XD,YD); +places_to_visit([[XD,YD]]).
 +step(N) : g(X,Y) <- +places_to_visit([[X,Y]]); !command_middle(please_go(X,Y)); !do_step.
 +step(N) : true <- .print("nevim co mam delat").
 
@@ -61,8 +55,13 @@
 +!send_fast(X) : friend(F) & .substring("Fast", F) <- .send(F, tell, X).
 +!send_fast(_) : true <- true.
 
++!command_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, achieve, X).
++!command_slow(X) : true <- true.
 +!command_middle(X) : friend(F) & .substring("Middle", F) <- .send(F, achieve, X).
 +!command_middle(X) : true <- true.
+
++!i_am_there(X,Y)[source(A)] : pos(X,Y) <- .send(A,achieve,load_it).
++!i_am_there(X,Y)[source(A)] : true <- +is_waiting(X,Y,A).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
@@ -164,16 +163,17 @@
 +!remove_visited : true <- true.
 
 +?shortest_path(X1,Y1,X2,Y2,P) : true <- ?distance(X1,Y1,X2,Y2,DISTANCE);
-	?astar(X2,Y2,[[DISTANCE,0,X1,Y1]],[],P);
+	?astar(X2,Y2,[[DISTANCE,0,X1,Y1]],[],P,0);
 	.reverse(P,PRev).
-+?astar(_,_,[],_,[],_).
-+?astar(Xto,Yto,OPEN,CLOSED,P) : true <- ?pop_lowest_score(OPEN,[SCORE,FROM_BEGIN,X,Y],REST);
++?astar(_,_,[],_,[],_,_).
++?astar(Xto,Yto,OPEN,CLOSED,P,STEPS) : true <- ?pop_lowest_score(OPEN,[SCORE,FROM_BEGIN,X,Y],REST);
 	if ( Xto == X & Yto == Y ) {
 		!start_reconstruction(Xto,Yto,P);
 		!remove_came_from;
 		!remove_visited;
 	} else {
 		+visited(X,Y);
+		.print(STEPS);
 		?neighbours(X,Y,FROM_BEGIN,Xto,Yto,REST,CLOSED,NEWOPEN);
-		?astar(Xto,Yto,NEWOPEN,[[X,Y]|CLOSED],P);
+		?astar(Xto,Yto,NEWOPEN,[[X,Y]|CLOSED],P,STEPS+1);
 	}.
