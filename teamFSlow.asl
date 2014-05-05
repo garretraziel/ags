@@ -10,7 +10,7 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step.
-+step(N) : true <- .print("nevim co mam delat").
++step(N) : true <- do(skip).
 
 +obstacle(X,Y) : true <- +obs(X,Y).
 
