@@ -9,12 +9,16 @@
 	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
 	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
 
-+step(0) : true <- +places_to_visit([[6,26],[16,16],[1,0],[5,26],[30,15],[2,12]]); do(skip).
++step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
++step(N) : have_to_load & pos(X,Y) <- -have_to_load; do(pick); -g(X,Y);
+	?depot(XD,YD); +places_to_visit([[XD,YD]]); +have_to_unload.
++step(N) : have_to_unload & depot(X,Y) & pos(X,Y) <- -have_to_unload; do(drop).
 +step(N) : moving_plan(_) <- .print("bla2");!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
-	.print(P);
+	!add_known_path(X2D,Y2D,X1D,Y1D,P);
 	.reverse(P,PRev);
+	!add_known_path(X1D,Y1D,X2D,Y2D,PRev);
 	-end_plan(_,_); do(skip).
 +step(N) : end_plan(X1,Y1) & pos(X2,Y2) <-
 	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
@@ -38,14 +42,21 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step.
-+step(N) : is_waiting(X,Y,A) & pos(X,Y) <- .send(A,achieve,load_it); do(pick); ?depot(XD,YD); +places_to_visit([[XD,YD]]).
++step(N) : is_waiting(X,Y,A) & pos(X,Y) <- .send(A,achieve,load_it); +have_to_load;
+	do(skip).
 +step(N) : g(X,Y) <- +places_to_visit([[X,Y]]); !command_middle(please_go(X,Y)); !do_step.
-+step(N) : true <- .print("nevim co mam delat").
++step(N) : true <- do(skip).
 
 +obstacle(X,Y) : true <- +obs(X,Y); !send_all(obs(X,Y)).
-+gold(X,Y) : true <- +g(X,Y); !send_all(g(X,Y)).
++gold(X,Y) : true <- +g(X,Y); !command_middle(g(X,Y)).
 +wood(X,Y) : true <- +w(X,Y); !send_all(w(X,Y)).
 +known_path(X1,Y1,X2,Y2,P) : true <- +known_path(X1,Y1,X2,Y2,P); !send_all(known_path(X1,Y1,X2,Y2,P)).
+
++!g(X,Y) : g(X,Y) <- true.
++!g(X,Y) : true <- +g(X,Y).
+
++!minus_g(X,Y) : g(X,Y) <- -g(X,Y).
++!minus_g(X,Y) : true <- true.
 
 +!send_all(X) : true <- !send_slow(X); !send_middle(X); !send_fast(X).
 +!send_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, tell, X).

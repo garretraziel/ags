@@ -9,14 +9,16 @@
 	+known_path(Xfrom,Yfrom,Xto-1,Yto+1,P);
 	+known_path(Xfrom,Yfrom,Xto+1,Yto-1,P).
 
-+step(0) : true <- +places_to_visit([[1,0]]); do(skip); do(skip).
++step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip); do(skip).
++step(N) : have_to_unload & depot(X,Y) & pos(X,Y) <- -have_to_unload; do(drop); .print("dropl").
++step(N) : have_to_load <- -have_to_load; +have_to_unload; do(pick); ?depot(XD,YD);
+	-places_to_visit(_); +places_to_visit([[XD,YD]]).
 +step(N) : moving_plan(_) <- .print("bla2");!do_step;!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) & current_path(X1D,Y1D,X2D,Y2D,P) <-
 	-current_path(X1D,Y1D,X2D,Y2D,P);
-	.print(P);
 	!add_known_path(X2D,Y2D,X1D,Y1D,P);
 	.reverse(P,PRev);
-	!add_known_path(X1D,Y1D,X2D,Y2D,P);
+	!add_known_path(X1D,Y1D,X2D,Y2D,PRev);
 	-end_plan(_,_); do(skip);do(skip).
 +step(N) : end_plan(X1,Y1) & pos(X2,Y2) <-
 	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
@@ -40,15 +42,22 @@
 	+moving_plan(TP); +end_plan(X1,Y1);
 	+places_to_visit(T);
 	!do_step;!do_step.
-+step(N) : pos(X,Y) & going(X,Y) & respond(A) <- .send(A,achieve,i_am_there(X,Y)); .print("poslano i am there").
++step(N) : pos(X,Y) & going(X,Y) & respond(A) <- -going(X,Y); -respond(A);
+	.send(A,achieve,i_am_there(X,Y)); do(skip); do(skip).
 +step(N) : true <- do(skip); do(skip).
 
 +obstacle(X,Y) : true <- +obs(X,Y); !send_all(obs(X,Y)).
-+gold(X,Y) : true <- +g(X,Y); !send_all(g(X,Y)).
++gold(X,Y) : true <- +g(X,Y); !command_slow(g(X,Y)).
 +wood(X,Y) : true <- +w(X,Y); !send_all(w(X,Y)).
 
++!g(X,Y) : g(X,Y) <- true.
++!g(X,Y) : true <- +g(X,Y).
+
++!minus_g(X,Y) : g(X,Y) <- -g(X,Y).
++!minus_g(X,Y) : true <- true.
+
 +!please_go(X,Y)[source(A)] <- +places_to_visit([[X,Y]]); +going(X,Y); +respond(A).
-+!load_it : true <- do(pick); do(skip); ?depot(XD,YD); +places_to_visit([XD,YD]).
++!load_it : true <- +have_to_load.
 
 +!send_all(X) : true <- !send_slow(X); !send_middle(X); !send_fast(X).
 +!send_slow(X) : friend(F) & .substring("Slow", F) <- .send(F, tell, X).
@@ -163,16 +172,17 @@
 +!remove_visited : true <- true.
 
 +?shortest_path(X1,Y1,X2,Y2,P) : true <- ?distance(X1,Y1,X2,Y2,DISTANCE);
-	?astar(X2,Y2,[[DISTANCE,0,X1,Y1]],[],P);
+	?astar(X2,Y2,[[DISTANCE,0,X1,Y1]],[],P,0);
 	.reverse(P,PRev).
-+?astar(_,_,[],_,[],_).
-+?astar(Xto,Yto,OPEN,CLOSED,P) : true <- ?pop_lowest_score(OPEN,[SCORE,FROM_BEGIN,X,Y],REST);
++?astar(_,_,[],_,[],_,_).
++?astar(Xto,Yto,OPEN,CLOSED,P,STEP) : true <- ?pop_lowest_score(OPEN,[SCORE,FROM_BEGIN,X,Y],REST);
 	if ( Xto == X & Yto == Y ) {
 		!start_reconstruction(Xto,Yto,P);
 		!remove_came_from;
 		!remove_visited;
 	} else {
 		+visited(X,Y);
+		.print(STEP);
 		?neighbours(X,Y,FROM_BEGIN,Xto,Yto,REST,CLOSED,NEWOPEN);
-		?astar(Xto,Yto,NEWOPEN,[[X,Y]|CLOSED],P);
+		?astar(Xto,Yto,NEWOPEN,[[X,Y]|CLOSED],P,STEP+1);
 	}.
