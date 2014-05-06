@@ -3,11 +3,20 @@
 
 +!react : idle & g(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
-+!react : idle & w(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
-	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
+/*+!react : idle & w(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.*/
 +!react : moving_plan(_) <- !do_step.
-+!react : end_plan(X,Y) & pos(X,Y) <-
-	-end_plan(_,_); !react.
++!react : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
+	!tellmiddle(load_it);
+	-end_plan(_,_); 
+	-middle_is_waiting;
+	-g(X,Y);
+	do(pick);
+	?pos(Xp,Yp);
+	?depot(Xd,Yd);
+	?astar(Xp,Yp,Xd,Yd,TP);
+	+moving_plan(TP);
+	+end_plan(Xd,Yd).
 +!react : true <- do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
@@ -31,6 +40,11 @@
 	for (friend(F)) {
 		.send(F,achieve,X);
 	}.
+	
++!tellmiddle(X) : friend(F) & .substring("Middle", F) <-
+	.send(F,achieve,X).
+	
++!i_am_ready : true <- +middle_is_waiting.
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);

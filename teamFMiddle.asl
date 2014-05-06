@@ -1,12 +1,26 @@
 +step(0) : true <- +idle; do(skip); do(skip).
 +step(N) : true <- !react.
 
-+!react : idle & have_to_go(X,Y) <- -idle; -have_to_go(_,_);
++!react : have_to_pickup <-
+	-have_to_pickup;
+	+have_to_unload;
+	do(pick);
+	?pos(Xp,Yp);
+	?depot(Xd,Yd);
+	?astar(Xp,Yp,Xd,Yd,TP);
+	+moving_plan(TP);
+	+end_plan(Xd,Yd).
++!react : idle & have_to_go(X,Y) <- -idle;
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
 +!react : moving_plan(_) <- !do_step; !do_step.
-+!react : end_plan(X,Y) & pos(X,Y) <-
-	-end_plan(_,_); !react.
++!react : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
+	-have_to_go(_,_);
+	-end_plan(_,_); !tellslow(i_am_ready); !react.
++!react : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
+	do(drop);
+	-have_to_unload;
+	+idle.
 +!react : true <- do(skip); do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
@@ -21,6 +35,7 @@
 +!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!please_go(X,Y) : true <- +have_to_go(X,Y).
++!load_it : true <- +have_to_pickup.
 	
 +!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
 	.send(F,achieve,please_go(X,Y)).
@@ -29,6 +44,9 @@
 	for (friend(F)) {
 		.send(F,achieve,X);
 	}.
+
++!tellslow(X) : friend(F) & .substring("Slow", F) <-
+	.send(F,achieve,X).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
