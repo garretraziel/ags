@@ -1,15 +1,16 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
-+step(0) : true <- !plan_all(P); +places_to_visit(P); do(skip);do(skip);do(skip).
++step(0) : true <- !plan_all_ng; +places_counter(0); do(skip);do(skip);do(skip).
 +step(N) : moving_plan(_) <- !do_step;!do_step;!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); do(skip); do(skip); do(skip).
-+step(N) : places_to_visit([[X1,Y1]|T]) & pos(X2,Y2) <-
-	-places_to_visit(_);
++step(N) : places_counter(C) & place_to_check(C,X1,Y1) & pos(X2,Y2) <-
+	-+places_counter(C+1);
+	-place_to_check(C,X1,Y1);	
 	.print("planuji");
 	?astar(X2,Y2,X1,Y1,TP);
 	.print("hotovo");
-	+moving_plan(TP); +end_plan(X1,Y1);
-	+places_to_visit(T);
+	+moving_plan(TP); 
+	+end_plan(X1,Y1);
 	!do_step; !do_step; !do_step.
 +step(N) : true <- do(skip);do(skip);do(skip).
 
@@ -29,6 +30,24 @@
 		.send(F,achieve,X);
 	}.
 
++!plan_all_ng : true <-
+	?grid_size(Xg,Yg);
+	+counter(0);
+	for (.range(X,0,(Xg-1)/2)) {
+		for (.range(Y,0,Yg-1))
+		{	
+			?counter(C);
+			-+counter(C+1);
+			if(X mod 2 == 0){
+				+place_to_check(C,2*X,Y);
+			} else {
+				+place_to_check(C,2*X,Yg-Y-1);
+			}
+		}
+	};
+	-counter(_).
+
+	
 +!plan_all(P) : true <-
 	?grid_size(Xg,Yg);
 	+planing([]);
