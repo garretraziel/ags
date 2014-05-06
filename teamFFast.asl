@@ -1,10 +1,9 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
-+step(0) : true <- do(skip);do(skip);do(skip).
++step(0) : true <- !plan_all(P); +places_to_visit(P); do(skip);do(skip);do(skip).
 +step(N) : moving_plan(_) <- !do_step;!do_step;!do_step.
 +step(N) : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); do(skip); do(skip); do(skip).
 +step(N) : places_to_visit([[X1,Y1]|T]) & pos(X2,Y2) <-
-	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
 	-places_to_visit(_);
 	.print("planuji");
 	?astar(X2,Y2,X1,Y1,TP);
@@ -14,7 +13,21 @@
 	!do_step; !do_step; !do_step.
 +step(N) : true <- do(skip);do(skip);do(skip).
 
-+obstacle(X,Y) : true <- +obs(X,Y).
++obstacle(X,Y) : obs(X,Y) <- true.
++obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
++gold(X,Y) : g(X,Y) <- true.
++gold(X,Y) : true <- +g(X,Y); !tellall(add_gold(X,Y)).
++wood(X,Y) : w(X,Y) <- true.
++wood(X,Y) : true <- +w(X,Y); !tellall(add_wood(X,Y)).
+
++!add_gold(X,Y) : true <- +g(X,Y).
++!add_wood(X,Y) : true <- +w(X,Y).
++!add_obstacle(X,Y) : true <- +obs(X,Y).
+
++!tellall(X) : true <-
+	for (friend(F)) {
+		.send(F,achieve,X);
+	}.
 
 +!plan_all(P) : true <-
 	?grid_size(Xg,Yg);

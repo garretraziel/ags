@@ -1,18 +1,36 @@
-//+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
-+step(0) : true <- +places_to_visit([[6,26],[16,16],[6,26],[16,16],[10,1],[6,26],[34,34],[16,16],[6,26]]); do(skip).
-+step(N) : moving_plan(_) <- !do_step.
-+step(N) : end_plan(X,Y) & pos(X,Y) <-
-	-end_plan(_,_); do(skip).
-+step(N) : places_to_visit([[X1,Y1]|T]) & pos(X2,Y2) <-
-	+current_path(X2,Y2,X1,Y1,[[X2,Y2]]);
-	-places_to_visit(_);
-	?astar(X2,Y2,X1,Y1,TP);
-	+moving_plan(TP); +end_plan(X1,Y1);
-	+places_to_visit(T);
-	!do_step.
-+step(N) : true <- do(skip).
++step(N) : true <- !react(N).
 
-+obstacle(X,Y) : true <- +obs(X,Y).
++!react(0) : true <- +idle; do(skip).
++!react(N) : idle & g(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(Xp,Yp); !do_step.
++!react(N) : idle & w(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(Xp,Yp); !do_step.
++!react(N) : moving_plan(_) <- !do_step.
++!react(N) : end_plan(X,Y) & pos(X,Y) <-
+	-end_plan(_,_); !react(N).
++!react(N) : true <- do(skip).
+
++obstacle(X,Y) : obs(X,Y) <- true.
++obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
++gold(X,Y) : g(X,Y) <- true.
++gold(X,Y) : true <- +g(X,Y); !tellall(add_gold(X,Y)).
++wood(X,Y) : w(X,Y) <- true.
++wood(X,Y) : true <- +w(X,Y); !tellall(add_wood(X,Y)).
+
++!add_gold(X,Y) : true <- +g(X,Y).
++!add_wood(X,Y) : true <- +w(X,Y).
++!add_obstacle(X,Y) : true <- +obs(X,Y).
+
++!inform_middle(X,Y) : friend(F) & .substring("Middle", F) <-
+	.send(F,achieve,please_go(X,Y)).
+
++!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
+	.send(F,achieve,please_go(X,Y)).
+
++!tellall(X) : true <-
+	for (friend(F)) {
+		.send(F,achieve,X);
+	}.
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
