@@ -43,10 +43,15 @@
 
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
 	-+places_counter(C+1);
-	-place_to_check(C,X1,Y1);	
+	//-place_to_check(C,X1,Y1);	
 	!plan_path(X1,Y1).
++!plan_next_point : places_counter(C) & place_to_check(_,_,_) <-
+	-+places_counter(C+1);
+	!plan_next_point.
+
 +!plan_next_point : true <- true.
-	//!do(skip); !do(skip); !do(skip).
+
+
 
 +!plan_path(Xto,Yto) : pos(Xfrom,Yfrom) <-
 	?astar(Xfrom,Yfrom,Xto,Yto,TP);
@@ -54,7 +59,7 @@
 	+end_plan(Xto,Yto).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
-+obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
++obstacle(X,Y) : true <- +obs(X,Y); -place_to_check(_,X,Y); !tellall(add_obstacle(X,Y)).
 +gold(X,Y) : g(X,Y) <- true.
 +gold(X,Y) : true <- +g(X,Y); !tellall(add_gold(X,Y)).
 +wood(X,Y) : w(X,Y) <- true.
@@ -62,7 +67,7 @@
 
 +!add_gold(X,Y) : true <- +g(X,Y).
 +!add_wood(X,Y) : true <- +w(X,Y).
-+!add_obstacle(X,Y) : true <- +obs(X,Y).
++!add_obstacle(X,Y) : true <- -place_to_check(_,X,Y); +obs(X,Y).
 
 +!tellall(X) : true <-
 	for (friend(F)) {
@@ -72,15 +77,45 @@
 +!plan_all_ng : true <-
 	?grid_size(Xg,Yg);
 	+counter(0);
-	for (.range(X,0,(Xg-1)/2)) {
+	for (.range(X,0,(Xg-1)/4)) {
 		for (.range(Y,0,Yg-1))
 		{	
 			?counter(C);
 			-+counter(C+1);
 			if(X mod 2 == 0){
-				+place_to_check(C,2*X,Y);
+				+place_to_check(C,4*X,Y);
 			} else {
-				+place_to_check(C,2*X,Yg-Y-1);
+				+place_to_check(C,4*X,Yg-Y-1);
+			}
+		}
+	};
+	for (.range(Y,0,(Yg-1)/2)) {
+		for (.range(X,0,Xg-1))
+		{	
+			?counter(C);
+			-+counter(C+1);
+			if(Y mod 2 == 0){
+				+place_to_check(C,X,2*Y);
+			} else {
+				+place_to_check(C,Xg-X-1,2*Y);
+			}
+		}
+	};
+	if(Yg mod 2 == 0){
+		+interlacing(1);
+	} else {
+		+interlacing(2);
+	}
+	?interlacing(I);
+	for (.range(Y,0,(Yg-1)/2)) {
+		for (.range(X,0,Xg-1))
+		{	
+			?counter(C);
+			-+counter(C+1);
+			if(Y mod 2 == 0){
+				+place_to_check(C,X,Yg-(2*Y)-I);
+			} else {
+				+place_to_check(C,Xg-X-1,Yg-(2*Y)-I);
 			}
 		}
 	};
@@ -115,11 +150,22 @@
 	-moving_plan(_);
 	+moving_plan(T);
 	!do_step.
-+!do_direction_step(X1,Y1) : pos(X1,Y1) <- !do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- !do(left).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- !do(up).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- !do(right).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- !do(down).
++!do_direction_step(X1,Y1) : pos(X1,Y1) <- !do_step; !update_places.
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- !do(left); !update_places.
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- !do(up); !update_places.
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- !do(right); !update_places.
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- !do(down); !update_places.
+
++!update_places : pos(X,Y) <- 
+	-place_to_check(_,X,Y);
+	-place_to_check(_,X,Y+1);
+	-place_to_check(_,X+1,Y);
+	-place_to_check(_,X+1,Y+1);
+	-place_to_check(_,X,Y-1);
+	-place_to_check(_,X-1,Y);
+	-place_to_check(_,X-1,Y-1);
+	-place_to_check(_,X-1,Y+1);
+	-place_to_check(_,X+1,Y-1).
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
 
