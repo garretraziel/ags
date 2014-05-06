@@ -19,14 +19,7 @@
 
 +!add_gold(X,Y) : true <- +g(X,Y).
 +!add_wood(X,Y) : true <- +w(X,Y).
-+!add_obstacle(X,Y) : true <- +obs(X,Y);
-	if (moving_plan(M) & .member([X,Y],M)) {
-		?end_plan(Xe,Ye);
-		?pos(Xp,Yp);
-		?astar(Xp,Yp,Xe,Ye,T);
-		-moving_plan(_);
-		+moving_plan(T);
-	}.
++!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!inform_middle(X,Y) : friend(F) & .substring("Middle", F) <-
 	.send(F,achieve,please_go(X,Y)).

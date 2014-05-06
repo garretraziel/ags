@@ -3,7 +3,7 @@
 +!react(0) : true <- +idle; do(skip); do(skip).
 +!react(N) : idle & have_to_go(X,Y) <- -idle; -have_to_go(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
-	!inform_middle(Xp,Yp); !do_step; !do_step.
+	!do_step; !do_step.
 +!react(N) : moving_plan(_) <- !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); !react(N).
@@ -18,14 +18,7 @@
 
 +!add_gold(X,Y) : true <- +g(X,Y).
 +!add_wood(X,Y) : true <- +w(X,Y).
-+!add_obstacle(X,Y) : true <- +obs(X,Y);
-	if (moving_plan(M) & .member([X,Y],M)) {
-		?end_plan(Xe,Ye);
-		?pos(Xp,Yp);
-		?astar(Xp,Yp,Xe,Ye,T);
-		-moving_plan(_);
-		+moving_plan(T);
-	}.
++!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!please_go(X,Y) : true <- +have_to_go(X,Y).
 	
