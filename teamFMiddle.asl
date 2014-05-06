@@ -1,6 +1,19 @@
 +step(0) : true <- +idle; do(skip); do(skip).
 +step(N) : true <- !react.
 
++!do_remaining_skip : true <-
+	if(moves_left(3)){
+		do(skip);do(skip);do(skip);
+	} else {
+	if(moves_left(2)){
+		do(skip);do(skip);
+	} else {
+	if(moves_left(1)){
+		do(skip);
+	}
+	}
+	}.
+	
 +!react : have_to_pickup <-
 	-have_to_pickup;
 	+have_to_unload;
@@ -35,7 +48,7 @@
 +!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!please_go(X,Y) : true <- +have_to_go(X,Y).
-+!load_it : true <- +have_to_pickup.
++!load_it : true <- +have_to_pickup; !do_remaining_skips.
 	
 +!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
 	.send(F,achieve,please_go(X,Y)).

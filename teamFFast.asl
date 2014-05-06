@@ -20,7 +20,6 @@
 	} else {
 	if(moves_left(1)){
 		!do_step;
-		!do_step;
 	}
 	}
 	}.

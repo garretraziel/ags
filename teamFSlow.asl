@@ -8,8 +8,11 @@
 +!react : moving_plan(_) <- !do_step.
 +!react : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
 	!tellmiddle(load_it);
-	-end_plan(_,_); 
 	-middle_is_waiting;
+	-end_plan(_,_);
+	+load;
+	do(skip).
++!react : pos(X,Y) & load <-
 	-g(X,Y);
 	do(pick);
 	?pos(Xp,Yp);
