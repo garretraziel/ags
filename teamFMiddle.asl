@@ -1,13 +1,13 @@
++step(0) : true <- +idle; do(skip).
 +step(N) : true <- !react(N).
 
-+!react(0) : true <- +idle; do(skip); do(skip).
-+!react(N) : idle & have_to_go(X,Y) <- -idle; -have_to_go(_,_);
++!react : idle & have_to_go(X,Y) <- -idle; -have_to_go(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
-+!react(N) : moving_plan(_) <- !do_step; !do_step.
-+!react(N) : end_plan(X,Y) & pos(X,Y) <-
-	-end_plan(_,_); !react(N).
-+!react(N) : true <- do(skip); do(skip).
++!react : moving_plan(_) <- !do_step; !do_step.
++!react : end_plan(X,Y) & pos(X,Y) <-
+	-end_plan(_,_); !react.
++!react : true <- do(skip); do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
