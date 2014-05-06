@@ -2,9 +2,9 @@
 
 +!react(0) : true <- +idle; do(skip).
 +!react(N) : idle & g(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
-	+moving_plan(TP); +end_plan(X,Y); !inform_middle(Xp,Yp); !do_step.
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
 +!react(N) : idle & w(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
-	+moving_plan(TP); +end_plan(X,Y); !inform_middle(Xp,Yp); !do_step.
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
 +!react(N) : moving_plan(_) <- !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); !react(N).
