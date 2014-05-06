@@ -1,5 +1,5 @@
-+step(0) : true <- +idle; do(skip).
-+step(N) : true <- !react(N).
++step(0) : true <- +idle; do(skip); do(skip).
++step(N) : true <- !react.
 
 +!react : idle & have_to_go(X,Y) <- -idle; -have_to_go(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);

@@ -1,5 +1,5 @@
 +step(0) : true <- +idle; do(skip).
-+step(N) : true <- !react(N).
++step(N) : true <- !react.
 
 +!react : idle & g(X,Y) <- -idle; ?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.

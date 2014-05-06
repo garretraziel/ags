@@ -1,18 +1,52 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
 +step(0) : true <- !plan_all_ng; +places_counter(0); do(skip);do(skip);do(skip).
-+step(N) : moving_plan(_) <- !do_step;!do_step;!do_step.
-+step(N) : end_plan(X,Y) & pos(X,Y) <-
-	-end_plan(_,_); do(skip); do(skip); do(skip).
-+step(N) : places_counter(C) & place_to_check(C,X1,Y1) & pos(X2,Y2) <-
-	-+places_counter(C+1);
-	-place_to_check(C,X1,Y1);	
++step(N) : true <- ?moves_left(M); .print(">> ",M); !react.
+
++!do(What) : true <-
+	if(moves_left(M) & M > 0){
+		.print("dododo");
+		do(What);
+	}.
+
++!do_remaining_steps : true <-
+	if(moves_left(3)){
+		!do_step;
+		!do_step;
+		!do_step;
+	} else {
+	if(moves_left(2)){
+		!do_step;
+		!do_step;
+	} else {
+	if(moves_left(1)){
+		!do_step;
+		!do_step;
+	}
+	}
+	}.
+	
+
++!react : moving_plan([]) <- 
+	-moving_plan(_);
+	-end_plan(_,_);
+	//!do(skip); !do(skip); !do(skip).
+	!react.
++!react : moving_plan(_) <- !do_remaining_steps.
++!react : end_plan(X,Y) & pos(X,Y) <-
+	-end_plan(_,_); 
+	//!do(skip); !do(skip); !do(skip).
+	!react.
++!react : places_counter(C) & place_to_check(C,X1,Y1) & pos(X2,Y2) <-
+	-+places_counter(C+1);	
 	.print("planuji");
 	?astar(X2,Y2,X1,Y1,TP);
 	.print("hotovo");
+	-place_to_check(C,X1,Y1);
 	+moving_plan(TP); 
 	+end_plan(X1,Y1);
-	!do_step; !do_step; !do_step.
-+step(N) : true <- do(skip);do(skip);do(skip).
+	//!do(skip); !do(skip); !do(skip).
+	!react.
++!react : true <- .print("!!1111! OMG FAIL!!!").
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
@@ -63,7 +97,7 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
-+!do_step : true <- do(skip).
++!do_step : true <- .print("harra harrr!!!!!!!!!!!!!"); !do(skip).
 
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & ((X1 < X2 & obstacle(X2-1,Y2)) |
 		(Y1 < Y2 & obstacle(X2,Y2-1)) | (X1 > X2 & obstacle(X2+1,Y2)) |
@@ -74,10 +108,10 @@
 	+moving_plan(T);
 	!do_step.
 +!do_direction_step(X1,Y1) : pos(X1,Y1) <- !do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- do(left).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- do(up).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- do(right).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- do(down).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- !do(left).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- !do(up).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- !do(right).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- !do(down).
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
 
@@ -133,6 +167,8 @@
 	-open_lowest(Cnew,FROM_BEGIN_LOW,XLOW,YLOW);
 	-openset(Cnew,FROM_BEGIN_LOW,XLOW,YLOW).
 
++?astar(Xfrom,Yfrom,Xto,Yto,[]) : obs(Xto,Yto) <- true.	
+	
 +?astar(Xfrom,Yfrom,Xto,Yto,P) : true <-
 	?distance(Xfrom,Yfrom,Xto,Yto,D);
 	+x(Xfrom);
@@ -141,18 +177,28 @@
 	+yto(Yto);
 	+from_start(0);
 	+closedset(Xfrom,Yfrom);
-	while ( (x(X) & y(Y)) & (Xto \== X | Yto \== Y) ) {
+	+open_not_empty;
+	while ( (x(X) & y(Y)) & (Xto \== X | Yto \== Y) & open_not_empty) {
 		!add_neighbours(X,Y);
 		
-		!pop_lowest_open(Xnew,Ynew,NEW_FROM_BEGIN);
+		if (openset(_,_,_,_)) {
+			!pop_lowest_open(Xnew,Ynew,NEW_FROM_BEGIN);
 		
-		-+x(Xnew);
-		-+y(Ynew);
+			-+x(Xnew);
+			-+y(Ynew);
 
-		+closedset(Xnew,Ynew);
-		-+from_start(NEW_FROM_BEGIN);
+			+closedset(Xnew,Ynew);
+			-+from_start(NEW_FROM_BEGIN);
+		} else {
+			-open_not_empty;
+		}
 	}
-	!start_reconstruction(Xto,Yto,P);
+	if (open_not_empty) {
+		!start_reconstruction(Xto,Yto,P);
+		-open_not_empty;
+	} else {
+		P = [];
+	}
 	.abolish(openset(_,_,_,_));
 	.abolish(closedset(_,_));
 	.abolish(came_from(_,_,_,_));
