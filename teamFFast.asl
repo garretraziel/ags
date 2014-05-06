@@ -36,17 +36,22 @@
 	-end_plan(_,_); 
 	//!do(skip); !do(skip); !do(skip).
 	!react.
-+!react : places_counter(C) & place_to_check(C,X1,Y1) & pos(X2,Y2) <-
-	-+places_counter(C+1);	
-	.print("planuji");
-	?astar(X2,Y2,X1,Y1,TP);
-	.print("hotovo");
-	-place_to_check(C,X1,Y1);
-	+moving_plan(TP); 
-	+end_plan(X1,Y1);
-	//!do(skip); !do(skip); !do(skip).
++!react : place_to_check(_,_,_) <-
+	!plan_next_point;
 	!react.
 +!react : true <- .print("!!1111! OMG FAIL!!!").
+
++!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
+	-+places_counter(C+1);
+	-place_to_check(C,X1,Y1);	
+	!plan_path(X1,Y1).
++!plan_next_point : true <- true.
+	//!do(skip); !do(skip); !do(skip).
+
++!plan_path(Xto,Yto) : pos(Xfrom,Yfrom) <-
+	?astar(Xfrom,Yfrom,Xto,Yto,TP);
+	+moving_plan(TP); 
+	+end_plan(Xto,Yto).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
@@ -97,7 +102,10 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
-+!do_step : true <- .print("harra harrr!!!!!!!!!!!!!"); !do(skip).
++!do_step : true <- .print("harra harrr!!!!!!!!!!!!!");
+	-end_plan(_,_);
+	!plan_next_point;
+	!do_step.
 
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & ((X1 < X2 & obstacle(X2-1,Y2)) |
 		(Y1 < Y2 & obstacle(X2,Y2-1)) | (X1 > X2 & obstacle(X2+1,Y2)) |
