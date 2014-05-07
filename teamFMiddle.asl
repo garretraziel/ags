@@ -30,13 +30,20 @@
 
 @nav[atomic] +!react(N) : have_to_pickup(N) <-
 	-have_to_pickup(N);
-	+have_to_unload;
-	?pos(Xp,Yp);
-	?depot(Xd,Yd);
-	?astar(Xp,Yp,Xd,Yd,TP);
-	-moving_plan(_);
-	+moving_plan(TP);
-	+end_plan(Xd,Yd);
+	?carrying_capacity(CapMax);
+	?carrying_wood(Woods);
+	?carrying_gold(Golds);
+	if(CapMax-1 == Woods+Golds){
+		+have_to_unload;
+		?pos(Xp,Yp);
+		?depot(Xd,Yd);
+		?astar(Xp,Yp,Xd,Yd,TP);
+		-moving_plan(_);
+		+moving_plan(TP);
+		+end_plan(Xd,Yd);
+	} else {
+		+idle;
+	}
 	do(pick).
 +!react(N) : have_to_pickup(M) & N > M <-
 	.print("oh fuck, uz jsem to prosvihl!");

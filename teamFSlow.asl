@@ -15,10 +15,13 @@
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
+	
 +!react(N) : idle & w(X,Y) <- -idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
+	
+	
 +!react(N) : moving_plan(M) <- .print("??????????"); !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
 	!tellmiddle(load_it(N+1));
@@ -29,12 +32,20 @@
 @react[atomic] +!react(N) : pos(X,Y) & load <-
 	-g(X,Y);-w(X,Y); //hahha!
 	-load;
-	+have_to_unload;	
-	?pos(Xp,Yp);
-	?depot(Xd,Yd);
-	?astar(Xp,Yp,Xd,Yd,TP);
-	+moving_plan(TP);
-	+end_plan(Xd,Yd);
+	?carrying_capacity(CapMax);
+	?carrying_wood(Woods);
+	?carrying_gold(Golds);
+	if(CapMax-1 == Woods+Golds){
+		+have_to_unload;
+		?pos(Xp,Yp);
+		?depot(Xd,Yd);
+		?astar(Xp,Yp,Xd,Yd,TP);
+		+moving_plan(TP);
+		+end_plan(Xd,Yd);
+	
+	} else {
+		+idle;
+	}
 	do(pick).
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);

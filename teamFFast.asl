@@ -68,8 +68,8 @@
 +!plan_next_point : true <- +scan_done.
 
 
-+!slow_beacon(X,Y) : true <- !update_places(X,Y).
-+!middle_beacon(X,Y) : true <- !update_places(X,Y).
++!slow_beacon(X,Y) : true <- !update_places_pos(X,Y).
++!middle_beacon(X,Y) : true <- !update_places_pos(X,Y).
 
 +!plan_path(Xto,Yto) : pos(Xfrom,Yfrom) <-
 	?astar(Xfrom,Yfrom,Xto,Yto,TP);
@@ -163,7 +163,7 @@
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- !do(right); !update_places.
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- !do(down); !update_places.
 
-+!update_places : pos(X,Y) <- 
++!update_places_pos(X,Y) : true <-
 	-place_to_check(_,X,Y);
 	-place_to_check(_,X,Y+1);
 	-place_to_check(_,X+1,Y);
@@ -173,6 +173,9 @@
 	-place_to_check(_,X-1,Y-1);
 	-place_to_check(_,X-1,Y+1);
 	-place_to_check(_,X+1,Y-1).
+
++!update_places : pos(X,Y) <- 
+	!update_places_pos(X,Y).
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
 
