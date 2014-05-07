@@ -5,28 +5,28 @@
 	.print(Xfrom," ",Yfrom," ",Xto," ",Yto,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	+moving_plan(Plan); +end_plan(Xto,Yto);
 	do(skip).
-+step(N) : true <- !react.
++step(N) : true <- !react(N).
 
 
 +!middle_beacon(X,Y) : true <- -+middle_pos(X,Y).
 +!slow_beacon(_,_) : true <- true.
 
-+!react : idle & g(X,Y) <- -idle;
++!react(N) : idle & g(X,Y) <- -idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
-+!react : idle & w(X,Y) <- -idle;
++!react(N) : idle & w(X,Y) <- -idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
-+!react : moving_plan(M) <- .print("??????????"); !do_step.
-+!react : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
-	!tellmiddle(load_it);
++!react(N) : moving_plan(M) <- .print("??????????"); !do_step.
++!react(N) : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
+	!tellmiddle(load_it(N+1));
 	-middle_is_waiting;
 	-end_plan(_,_);
 	+load;
 	do(skip).
-+!react : pos(X,Y) & load <-
++!react(N) : pos(X,Y) & load <-
 	-g(X,Y);-w(X,Y); //hahha!
 	-load;
 	+have_to_unload;
@@ -36,12 +36,12 @@
 	?astar(Xp,Yp,Xd,Yd,TP);
 	+moving_plan(TP);
 	+end_plan(Xd,Yd).
-+!react : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
 	do(drop);
 	-have_to_unload;
 	+idle.	
-+!react : true <- do(skip).
++!react(N) : true <- do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).

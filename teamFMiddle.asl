@@ -5,7 +5,7 @@
 	.print(Xfrom," ",Yfrom," ",Xto," ",Yto,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	+moving_plan(Plan); +end_plan(Xto,Yto); 
 	do(skip); do(skip).
-+step(N) : true <- -+curstep(N); ?moves_left(M); -+moves(M); !react.
++step(N) : true <- ?moves_left(M); -+moves(M); !react(N).
 
 @mydo[atomic] +!do(What) : true <-
 	if(moves(M) & M > 0){
@@ -14,6 +14,7 @@
 	}.
 
 +!do_remaining_skip : true <-
+	.print("skipping remaining... <<<<<<<<<");
 	if(moves(2)){
 		!do(skip);!do(skip);
 	} else {
@@ -27,38 +28,37 @@
 +!middle_beacon(_,_) : true <- true.
 	
 
-+!react : have_to_pickup <-
-	?curstep(N);
-	.print("hur currstep picpuk:",N);
-	-have_to_pickup;
++!react(N) : have_to_pickup(N) <-
+	-have_to_pickup(N);
 	+have_to_unload;
 	do(pick);
 	?pos(Xp,Yp);
 	?depot(Xd,Yd);
 	?astar(Xp,Yp,Xd,Yd,TP);
+	-moving_plan(_);
 	+moving_plan(TP);
 	+end_plan(Xd,Yd).
-+!react : idle & have_to_go(X,Y) <- -idle;
-	?curstep(N);
-	.print("hur currstep idle:",N);
++!react(N) : have_to_pickup(M) & N > M <-
+	.print("oh fuck, uz jsem to prosvihl!");
+	-have_to_pickup(M);
+	+idle;
+	.print("skipping late pickup... <<<<<<<<<");
+	!do(skip);!do(skip).
++!react(N) : idle & have_to_go(X,Y) <- -idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
-+!react : moving_plan(M) <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
-+!react : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
-	?curstep(N);
-	.print("hur currstep havetogo:",N);
++!react(N) : moving_plan(M) <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
 	-have_to_go(_,_);
-	-end_plan(_,_); !tellslow(i_am_ready); !react.
-+!react : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
-	?curstep(N);
-	.print("hur currstep unlaod:",N);
+	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
 	do(drop);
 	-have_to_unload;
 	+idle.
-+!react : true <- ?curstep(N);
-	.print("hur currstep skypuju pyco:",N); !do(skip); !do(skip).
++!react(N) : true & (not have_to_unload) <- .print("skipping no nothing... <<<<<<<<<"); !do(skip); !do(skip).
++!react(N) : true <- ?moving_plan(M); .print("omgfail!!!!! ", M).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
@@ -72,7 +72,7 @@
 +!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!please_go(X,Y) : true <- +have_to_go(X,Y).
-+!load_it : true <- +have_to_pickup; .print("prislohavetopicpuk").
++!load_it(N) : true <- +have_to_pickup(N).
 	
 +!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
 	.send(F,achieve,please_go(X,Y)).
@@ -88,7 +88,7 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
-+!do_step : true <- !do(skip).
++!do_step : true <- .print("skipping in do step... <<<<<<<<<"); !do(skip).
 
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & ((X1 < X2 & obstacle(X2-1,Y2)) |
 		(Y1 < Y2 & obstacle(X2,Y2-1)) | (X1 > X2 & obstacle(X2+1,Y2)) |
