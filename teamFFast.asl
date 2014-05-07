@@ -1,10 +1,10 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
-+step(0) : true <- !plan_all_ng; +places_counter(0); do(skip);do(skip);do(skip).
-+step(N) : true <- ?moves_left(M); .print(">> ",M); !react.
++step(0) : true <- !plan_all_ng; +places_counter(0);
+	do(skip);do(skip);do(skip).
++step(N) : true <- !react.
 
 +!do(What) : true <-
 	if(moves_left(M) & M > 0){
-		.print("dododo");
 		do(What);
 	}.
 
@@ -51,7 +51,7 @@
 +!react : place_to_check(_,_,_) <-
 	!plan_next_point;
 	!react.
-+!react : true <- .print("!!1111! OMG FAIL!!!"); !do_remaining_skip.
++!react : true <- !do_remaining_skip.
 
 +!plan_next_point : places_counter(C) & final(C) <- 
 	for (place_to_check(Ct,X,Y)){
@@ -82,7 +82,7 @@
 	+end_plan(Xto,Yto).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
-+obstacle(X,Y) : true <- +obs(X,Y); -place_to_check(_,X,Y); !tellall(add_obstacle(X,Y)).
++obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
 +gold(X,Y) : g(X,Y) <- true.
 +gold(X,Y) : true <- +g(X,Y); !tellall(add_gold(X,Y)).
 +wood(X,Y) : w(X,Y) <- true.
@@ -90,7 +90,7 @@
 
 +!add_gold(X,Y) : true <- +g(X,Y).
 +!add_wood(X,Y) : true <- +w(X,Y).
-+!add_obstacle(X,Y) : true <- -place_to_check(_,X,Y); +obs(X,Y).
++!add_obstacle(X,Y) : true <- +obs(X,Y).
 
 +!tellall(X) : true <-
 	for (friend(F)) {
@@ -145,19 +145,6 @@
 	?counter(C);
 	+final(C+1);
 	-counter(_).
-
-	
-+!plan_all(P) : true <-
-	?grid_size(Xg,Yg);
-	+planing([]);
-	for (.range(X,0,Xg-1)) {
-		for (.range(Y,0,Yg-1)) {
-			?planing(PT);
-			-+planing([[X,Yg-Y-1]|PT]);
-		}
-	}
-	?planing(P);
-	-planing(P).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
