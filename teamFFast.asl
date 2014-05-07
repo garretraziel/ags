@@ -8,6 +8,20 @@
 		do(What);
 	}.
 
++!do_remaining_skip : true <-
+	if(moves_left(3)){
+		do(skip);do(skip);do(skip);
+	} else {
+	if(moves_left(2)){
+		do(skip);do(skip);
+	} else {
+	if(moves_left(1)){
+		do(skip);
+	}
+	}
+	}. 
+
+	
 +!do_remaining_steps : true <-
 	if(moves_left(3)){
 		!do_step;
@@ -24,7 +38,6 @@
 	}
 	}.
 	
-
 +!react : moving_plan([]) <- 
 	-moving_plan(_);
 	-end_plan(_,_);
@@ -38,8 +51,15 @@
 +!react : place_to_check(_,_,_) <-
 	!plan_next_point;
 	!react.
-+!react : true <- .print("!!1111! OMG FAIL!!!").
++!react : true <- .print("!!1111! OMG FAIL!!!"); !do_remaining_skip.
 
++!plan_next_point : places_counter(C) & final(C) <- 
+	for (place_to_check(Ct,X,Y)){
+		-place_to_check(Ct,X,Y);
+	}
+	.print("tady // uklizeno!!! <<<<<");
+	+scan_done.
+	-final(C).
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
 	-+places_counter(C+1);
 	//-place_to_check(C,X1,Y1);	
@@ -48,7 +68,7 @@
 	-+places_counter(C+1);
 	!plan_next_point.
 
-+!plan_next_point : true <- true.
++!plan_next_point : true <- +scan_done.
 
 
 +!slow_beacon(X,Y) : true <- -place_to_check(_,X,Y).
@@ -122,6 +142,8 @@
 			}
 		}
 	};
+	?counter(C);
+	+final(C+1);
 	-counter(_).
 
 	
@@ -140,6 +162,7 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
++!do_step : scan_done <- .print("wakka wakka wakka"); !do_remaining_skip.
 +!do_step : true <- .print("harra harrr!!!!!!!!!!!!!");
 	-end_plan(_,_);
 	!plan_next_point;
