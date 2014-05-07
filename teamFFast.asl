@@ -1,7 +1,7 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
 +step(0) : true <- !plan_all_ng; +places_counter(0);
 	do(skip);do(skip);do(skip).
-@step[atomic] +step(N) : true <- ?moves_left(M); -+moves(M); !react.
++step(N) : true <- ?moves_left(M); -+moves(M); !react.
 
 @mydo[atomic] +!do(What) : true <-
 	if(moves(M) & M > 0){
@@ -9,7 +9,7 @@
 		do(What);
 	}.
 
-@remain[atomic] +!do_remaining_skip : true <-
++!do_remaining_skip : true <-
 	if(moves(3)){
 		!do(skip);!do(skip);!do(skip);
 	} else {
@@ -23,7 +23,7 @@
 	}. 
 
 	
-@remainstep[atomic] +!do_remaining_steps : true <-
++!do_remaining_steps : true <-
 	if(moves(3)){
 		!do_step;
 		!do_step;

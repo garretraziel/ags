@@ -19,7 +19,7 @@
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
-+!react : moving_plan(_) <- !do_step.
++!react : moving_plan(M) <- .print("??????????"); !do_step.
 +!react : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
 	!tellmiddle(load_it);
 	-middle_is_waiting;
