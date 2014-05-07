@@ -11,14 +11,40 @@
 +!middle_beacon(X,Y) : true <- -+middle_pos(X,Y).
 +!slow_beacon(_,_) : true <- true.
 
-+!react(N) : idle & g(X,Y) <- -idle;
++!react(N) : idle & g(Xl,Yl) <- -idle;
+	?pos(Xp,Yp); 
+	?astar(Xp,Yp,Xl,Yl,DistPlan);
+	.length(DistPlan, Dist);
+	+nearest(Xl,Yl,Dist);
+	for(g(Xt,Yt)){
+		?astar(Xp,Yp,Xt,Yt,DistPlanFor);
+		.length(DistPlanFor, DistFor);
+		if(nearest(_,_,Dn) & Dn > DistFor){
+			-+nearest(Xt,Yt,DistFor);
+		}		
+	}
 	-moving_plan(_); -end_plan(_,_);
-	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
+	?nearest(X,Y,_);
+	-nearest(_,_,_);
+	?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
 	
-+!react(N) : idle & w(X,Y) <- -idle;
++!react(N) : idle & w(Xl,Yl) <- -idle;
+	?pos(Xp,Yp); 
+	?astar(Xp,Yp,Xl,Yl,DistPlan);
+	.length(DistPlan, Dist);
+	+nearest(Xl,Yl,Dist);
+	for(g(Xt,Yt)){
+		?astar(Xp,Yp,Xt,Yt,DistPlanFor);
+		.length(DistPlanFor, DistFor);
+		if(nearest(_,_,Dn) & Dn > DistFor){
+			-+nearest(Xt,Yt,DistFor);
+		}		
+	}
 	-moving_plan(_); -end_plan(_,_);
-	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP);
+	?nearest(X,Y,_);
+	-nearest(_,_,_);
+	?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y); !do_step.
 	
 	
