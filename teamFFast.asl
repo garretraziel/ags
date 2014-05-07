@@ -51,6 +51,10 @@
 +!plan_next_point : true <- true.
 
 
++!slow_beacon(X,Y) : true <- -place_to_check(_,X,Y).
++!middle_beacon(X,Y) : true <- -place_to_check(_,X,Y).
+
+
 
 +!plan_path(Xto,Yto) : pos(Xfrom,Yfrom) <-
 	?astar(Xfrom,Yfrom,Xto,Yto,TP);

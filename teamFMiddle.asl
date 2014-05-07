@@ -1,4 +1,10 @@
-+step(0) : true <- +idle; do(skip); do(skip).
++step(0) : true <-  
+	+idle;
+	?pos(Xfrom,Yfrom); ?depot(Xto,Yto);
+	?astar(Xfrom, Yfrom, Xto, Yto, Plan);
+	.print(Xfrom," ",Yfrom," ",Xto," ",Yto,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+	+moving_plan(Plan); +end_plan(Xto,Yto); 
+	do(skip); do(skip).
 +step(N) : true <- !react.
 
 +!do_remaining_skip : true <-
@@ -13,7 +19,12 @@
 	}
 	}
 	}.
+
+
++!slow_beacon(X,Y) : true <- -+slow_pos(X,Y). 
++!middle_beacon(_,_) : true <- true.
 	
+
 +!react : have_to_pickup <-
 	-have_to_pickup;
 	+have_to_unload;
@@ -24,6 +35,7 @@
 	+moving_plan(TP);
 	+end_plan(Xd,Yd).
 +!react : idle & have_to_go(X,Y) <- -idle;
+	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
 +!react : moving_plan(_) <- !do_step; !do_step.
@@ -31,6 +43,7 @@
 	-have_to_go(_,_);
 	-end_plan(_,_); !tellslow(i_am_ready); !react.
 +!react : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
+	-end_plan(X,Y);
 	do(drop);
 	-have_to_unload;
 	+idle.
@@ -75,10 +88,10 @@
 	+moving_plan(T);
 	!do_step.
 +!do_direction_step(X1,Y1) : pos(X1,Y1) <- !do_step.
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- do(left).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- do(up).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- do(right).
-+!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- do(down).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 < X2 <- do(left); !tellall(middle_beacon(X1,X2)).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 < Y2 <- do(up); !tellall(middle_beacon(X1,X2)).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & X1 > X2 <- do(right); !tellall(middle_beacon(X1,X2)).
++!do_direction_step(X1,Y1) : pos(X2,Y2) & Y1 > Y2 <- do(down); !tellall(middle_beacon(X1,X2)).
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
 
