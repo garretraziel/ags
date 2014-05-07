@@ -1,38 +1,39 @@
 //+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
 +step(0) : true <- !plan_all_ng; +places_counter(0);
 	do(skip);do(skip);do(skip).
-+step(N) : true <- !react.
+@step[atomic] +step(N) : true <- ?moves_left(M); -+moves(M); !react.
 
-+!do(What) : true <-
-	if(moves_left(M) & M > 0){
+@mydo[atomic] +!do(What) : true <-
+	if(moves(M) & M > 0){
+		-+moves(M-1);
 		do(What);
 	}.
 
-+!do_remaining_skip : true <-
-	if(moves_left(3)){
-		do(skip);do(skip);do(skip);
+@remain[atomic] +!do_remaining_skip : true <-
+	if(moves(3)){
+		!do(skip);!do(skip);!do(skip);
 	} else {
-	if(moves_left(2)){
-		do(skip);do(skip);
+	if(moves(2)){
+		!do(skip);!do(skip);
 	} else {
-	if(moves_left(1)){
-		do(skip);
+	if(moves(1)){
+		!do(skip);
 	}
 	}
 	}. 
 
 	
-+!do_remaining_steps : true <-
-	if(moves_left(3)){
+@remainstep[atomic] +!do_remaining_steps : true <-
+	if(moves(3)){
 		!do_step;
 		!do_step;
 		!do_step;
 	} else {
-	if(moves_left(2)){
+	if(moves(2)){
 		!do_step;
 		!do_step;
 	} else {
-	if(moves_left(1)){
+	if(moves(1)){
 		!do_step;
 	}
 	}
@@ -41,12 +42,10 @@
 +!react : moving_plan([]) <- 
 	-moving_plan(_);
 	-end_plan(_,_);
-	//!do(skip); !do(skip); !do(skip).
 	!react.
 +!react : moving_plan(_) <- !do_remaining_steps.
 +!react : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); 
-	//!do(skip); !do(skip); !do(skip).
 	!react.
 +!react : place_to_check(_,_,_) <-
 	!plan_next_point;
@@ -57,7 +56,6 @@
 	for (place_to_check(Ct,X,Y)){
 		-place_to_check(Ct,X,Y);
 	}
-	.print("tady // uklizeno!!! <<<<<");
 	+scan_done.
 	-final(C).
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
@@ -67,14 +65,11 @@
 +!plan_next_point : places_counter(C) & place_to_check(_,_,_) <-
 	-+places_counter(C+1);
 	!plan_next_point.
-
 +!plan_next_point : true <- +scan_done.
 
 
 +!slow_beacon(X,Y) : true <- -place_to_check(_,X,Y).
 +!middle_beacon(X,Y) : true <- -place_to_check(_,X,Y).
-
-
 
 +!plan_path(Xto,Yto) : pos(Xfrom,Yfrom) <-
 	?astar(Xfrom,Yfrom,Xto,Yto,TP);
@@ -147,10 +142,9 @@
 	-counter(_).
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
-+!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
-	!do_direction_step(X,Y).
-+!do_step : scan_done <- .print("wakka wakka wakka"); !do_remaining_skip.
-+!do_step : true <- .print("harra harrr!!!!!!!!!!!!!");
++!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T); !do_direction_step(X,Y).
++!do_step : scan_done <- !do_remaining_skip.
++!do_step : true <- .print("harra harrr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	-end_plan(_,_);
 	!plan_next_point;
 	!do_step.
