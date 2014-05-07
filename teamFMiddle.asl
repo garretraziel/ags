@@ -51,19 +51,27 @@
 	+idle;
 	.print("skipping late pickup... <<<<<<<<<");
 	!do(skip);!do(skip).
-+!react(N) : idle & have_to_go(X,Y) <- -idle;
-	-moving_plan(_); -end_plan(_,_);
-	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
-	!do_step; !do_step.
+
 +!react(N) : moving_plan(M)[source(self)] <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
-+!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
-	-have_to_go(_,_);
-	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
 	do(drop);
 	-have_to_unload;
 	+idle.
++!react(N) : idle & have_to_go(X,Y,cw) & carrying_gold(0) <- -idle;
+	-moving_plan(_); -end_plan(_,_);
+	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
+	!do_step; !do_step.
++!react(N) : idle & have_to_go(X,Y,cg) & carrying_wood(0) <- -idle;
+	-moving_plan(_); -end_plan(_,_);
+	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
+	!do_step; !do_step.
++!react(N) : idle & have_to_go(X,Y,_) <- +have_to_unload; ?depot(Xd,Yd); 	
+	?pos(Xp,Yp); ?astar(Xp,Yp,Xd,Yd,TP); +moving_plan(TP); +end_plan(Xd,Yd);
+	!do_step; !do_step.
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
+	-have_to_go(_,_);
+	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
 +!react(N) : true & (not have_to_unload) <- .print("skipping no nothing... <<<<<<<<<"); !do(skip); !do(skip).
 +!react(N) : true <- .print("omgfail!!!!! ").
 
@@ -78,7 +86,7 @@
 +!add_wood(X,Y) : true <- +w(X,Y).
 +!add_obstacle(X,Y) : true <- +obs(X,Y).
 
-+!please_go(X,Y) : true <- +have_to_go(X,Y).
++!please_go(X,Y,What) : true <- +have_to_go(X,Y,What).
 +!load_it(N) : true <- +have_to_pickup(N).
 	
 +!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
