@@ -28,16 +28,16 @@
 +!middle_beacon(_,_) : true <- true.
 	
 
-+!react(N) : have_to_pickup(N) <-
+@nav[atomic] +!react(N) : have_to_pickup(N) <-
 	-have_to_pickup(N);
 	+have_to_unload;
-	do(pick);
 	?pos(Xp,Yp);
 	?depot(Xd,Yd);
 	?astar(Xp,Yp,Xd,Yd,TP);
 	-moving_plan(_);
 	+moving_plan(TP);
-	+end_plan(Xd,Yd).
+	+end_plan(Xd,Yd);
+	do(pick).
 +!react(N) : have_to_pickup(M) & N > M <-
 	.print("oh fuck, uz jsem to prosvihl!");
 	-have_to_pickup(M);
@@ -48,7 +48,7 @@
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
-+!react(N) : moving_plan(M) <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
++!react(N) : moving_plan(M)[source(self)] <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
 	-have_to_go(_,_);
 	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
@@ -58,7 +58,7 @@
 	-have_to_unload;
 	+idle.
 +!react(N) : true & (not have_to_unload) <- .print("skipping no nothing... <<<<<<<<<"); !do(skip); !do(skip).
-+!react(N) : true <- ?moving_plan(M); .print("omgfail!!!!! ", M).
++!react(N) : true <- .print("omgfail!!!!! ").
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).

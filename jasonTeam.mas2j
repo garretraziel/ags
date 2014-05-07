@@ -5,7 +5,7 @@
 MAS miners {
     infrastructure: Centralised
 	
-    environment: mining.MiningPlanet(3,10,yes)
+    environment: mining.MiningPlanet(3,20,yes)
         // parameters: 1. environment configuration id (from 1 to 4)
         //             2. sleep time (in ms) after each action
         //             3. whether display the gui
