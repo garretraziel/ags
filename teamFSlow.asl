@@ -26,21 +26,21 @@
 	-end_plan(_,_);
 	+load;
 	do(skip).
-+!react(N) : pos(X,Y) & load <-
+@react[atomic] +!react(N) : pos(X,Y) & load <-
 	-g(X,Y);-w(X,Y); //hahha!
 	-load;
-	+have_to_unload;
-	do(pick);
+	+have_to_unload;	
 	?pos(Xp,Yp);
 	?depot(Xd,Yd);
 	?astar(Xp,Yp,Xd,Yd,TP);
 	+moving_plan(TP);
-	+end_plan(Xd,Yd).
+	+end_plan(Xd,Yd);
+	do(pick).
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
-	do(drop);
 	-have_to_unload;
-	+idle.	
+	+idle;
+	do(drop).
 +!react(N) : true <- do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
