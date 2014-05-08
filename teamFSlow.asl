@@ -3,7 +3,6 @@
 	?pos(Xfrom,Yfrom); ?depot(Xto,Yto);
 	?astar(Xfrom, Yfrom, Xto, Yto, Plan);
 	+moving_plan(Plan); +end_plan(Xto,Yto);
-	+carrying_gold; +carrying_wood;
 	do(skip).
 +step(N) : true <- !react(N).
 
@@ -11,7 +10,7 @@
 +!middle_beacon(X,Y) : true <- -+middle_pos(X,Y).
 +!slow_beacon(_,_) : true <- true.
 
-+!react(N) : idle & g(Xl,Yl) & carrying_gold <- -idle;
++!react(N) : idle & g(Xl,Yl) & carrying_wood(0) <- -idle;
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
@@ -27,9 +26,9 @@
 	?nearest(X,Y,_);
 	-nearest(_,_,_);
 	?astar(Xp,Yp,X,Y,TP);
-	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,carrying_gold); !do_step.
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cg); !do_step.
 	
-+!react(N) : idle & w(Xl,Yl) & carrying_wood <- -idle;
++!react(N) : idle & w(Xl,Yl) & carrying_gold(0) <- -idle;
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
@@ -45,7 +44,7 @@
 	?nearest(X,Y,_);
 	-nearest(_,_,_);
 	?astar(Xp,Yp,X,Y,TP);
-	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,carrying_wood); !do_step.
+	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cw); !do_step.
 	
 	
 +!react(N) : moving_plan(M) <- !do_step.
@@ -56,15 +55,9 @@
 	+load;
 	do(skip).
 @react[atomic] +!react(N) : pos(X,Y) & load <-
-	if(carrying_gold & carrying_wood){
-		-carrying_gold;
-		-carrying_wood;
-	}
 	if(g(X,Y)){
-		+carrying_gold;
 		-g(X,Y);
 	} else {
-		+carrying_wood;
 		-w(X,Y);
 	}
 	//hahha!
@@ -88,7 +81,6 @@
 	-end_plan(X,Y);
 	-have_to_unload;
 	+idle;
-	+carrying_wood; +carrying_gold;
 	do(drop).
 +!react(N) : true <- do(skip).
 

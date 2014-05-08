@@ -24,7 +24,7 @@
 
 +!slow_beacon(X,Y) : true <- -+slow_pos(X,Y). 
 +!middle_beacon(_,_) : true <- true.
-	
+
 
 @nav[atomic] +!react(N) : have_to_pickup(N) <-
 	-have_to_pickup(N);
@@ -51,9 +51,9 @@
 +!react(N) : moving_plan(M)[source(self)] <- !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
-	do(drop);
 	-have_to_unload;
-	+idle.
+	+idle;
+	do(drop).
 +!react(N) : idle & have_to_go(X,Y,cw) & carrying_gold(0) <- -idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
@@ -65,8 +65,8 @@
 +!react(N) : idle & have_to_go(X,Y,_) <- +have_to_unload; ?depot(Xd,Yd); 	
 	?pos(Xp,Yp); ?astar(Xp,Yp,Xd,Yd,TP); +moving_plan(TP); +end_plan(Xd,Yd);
 	!do_step; !do_step.
-+!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
-	-have_to_go(_,_);
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y,_) <-
+	-have_to_go(_,_,_);
 	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
 +!react(N) : true <- !do(skip); !do(skip).
 
