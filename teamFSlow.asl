@@ -10,7 +10,14 @@
 +!middle_beacon(X,Y) : true <- -+middle_pos(X,Y).
 +!slow_beacon(_,_) : true <- true.
 
++!react(N) : moving_plan(M) <- !do_step.
++!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
+	-end_plan(X,Y);
+	-have_to_unload;
+	+idle;
+	do(drop).
 +!react(N) : idle & g(Xl,Yl) & carrying_wood(0) <- -idle;
+	.print("nemam zadne drevo, jdu");
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
@@ -29,11 +36,12 @@
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cg); !do_step.
 	
 +!react(N) : idle & w(Xl,Yl) & carrying_gold(0) <- -idle;
+	.print("nemam zadne zlato, jdu");
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
 	+nearest(Xl,Yl,Dist);
-	for(g(Xt,Yt)){
+	for(w(Xt,Yt)){
 		?astar(Xp,Yp,Xt,Yt,DistPlanFor);
 		.length(DistPlanFor, DistFor);
 		if(nearest(_,_,Dn) & Dn > DistFor){
@@ -45,9 +53,12 @@
 	-nearest(_,_,_);
 	?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cw); !do_step.
-	
-	
-+!react(N) : moving_plan(M) <- !do_step.
++!react(N) : idle & (w(_,_) | g(_,_)) <-
+	-idle;
+	?pos(Xp,Yp);
+	?depot(Xd,Yd);
+	?astar(Xp,Yp,Xd,Yd,TP);
+	+moving_plan(TP); +end_plan(Xd,Yd); +have_to_unload; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
 	!tellmiddle(load_it(N+1));
 	-middle_is_waiting;
@@ -77,11 +88,6 @@
 		+idle;
 	}
 	do(pick).
-+!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
-	-end_plan(X,Y);
-	-have_to_unload;
-	+idle;
-	do(drop).
 +!react(N) : true <- do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
