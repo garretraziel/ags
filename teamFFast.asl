@@ -56,7 +56,8 @@
 	for (place_to_check(Ct,X,Y)){
 		-place_to_check(Ct,X,Y);
 	}
-	+scan_done.
+	+scan_done;
+	!tellall(scan_done);
 	-final(C).
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
 	-+places_counter(C+1);

@@ -31,7 +31,7 @@
 	?carrying_capacity(CapMax);
 	?carrying_wood(Woods);
 	?carrying_gold(Golds);
-	if(CapMax-1 == Woods+Golds){
+	if(CapMax-1 == Woods+Golds | (scan_completed & (not g(_,_)) & (not w(_,_)))){
 		+have_to_unload;
 		?pos(Xp,Yp);
 		?depot(Xd,Yd);
@@ -47,7 +47,6 @@
 	-have_to_pickup(M);
 	+idle;
 	!do(skip);!do(skip).
-
 +!react(N) : moving_plan(M)[source(self)] <- !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
@@ -83,7 +82,8 @@
 
 +!please_go(X,Y,What) : true <- +have_to_go(X,Y,What).
 +!load_it(N) : true <- +have_to_pickup(N).
-	
++!scan_done : true <- +scan_completed.	
+
 +!inform_fast(X,Y) : friend(F) & .substring("Fast", F) <-
 	.send(F,achieve,please_go(X,Y)).
 

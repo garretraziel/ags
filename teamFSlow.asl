@@ -76,7 +76,7 @@
 	?carrying_capacity(CapMax);
 	?carrying_wood(Woods);
 	?carrying_gold(Golds);
-	if(CapMax-1 == Woods+Golds){
+	if(CapMax-1 == Woods+Golds | (scan_completed & (not g(_,_)) & (not w(_,_)))){
 		+have_to_unload;
 		?pos(Xp,Yp);
 		?depot(Xd,Yd);
@@ -116,6 +116,7 @@
 	.send(F,achieve,X).
 	
 +!i_am_ready : true <- +middle_is_waiting.
++!scan_done : true <- +scan_completed.
 
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
