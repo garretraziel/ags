@@ -2,7 +2,6 @@
 	+idle;
 	?pos(Xfrom,Yfrom); ?depot(Xto,Yto);
 	?astar(Xfrom, Yfrom, Xto, Yto, Plan);
-	.print(Xfrom," ",Yfrom," ",Xto," ",Yto,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	+moving_plan(Plan); +end_plan(Xto,Yto); 
 	do(skip); do(skip).
 +step(N) : true <- ?moves_left(M); -+moves(M); !react(N).
@@ -14,7 +13,6 @@
 	}.
 
 +!do_remaining_skip : true <-
-	.print("skipping remaining... <<<<<<<<<");
 	if(moves(2)){
 		!do(skip);!do(skip);
 	} else {
@@ -46,13 +44,11 @@
 	}
 	do(pick).
 +!react(N) : have_to_pickup(M) & N > M <-
-	.print("oh fuck, uz jsem to prosvihl!");
 	-have_to_pickup(M);
 	+idle;
-	.print("skipping late pickup... <<<<<<<<<");
 	!do(skip);!do(skip).
 
-+!react(N) : moving_plan(M)[source(self)] <- .print("!!!!!!!!!!!!!!!!!!!!!"); !do_step; !do_step.
++!react(N) : moving_plan(M)[source(self)] <- !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
 	-end_plan(X,Y);
 	do(drop);
@@ -72,8 +68,7 @@
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y) <-
 	-have_to_go(_,_);
 	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
-+!react(N) : true & (not have_to_unload) <- .print("skipping no nothing... <<<<<<<<<"); !do(skip); !do(skip).
-+!react(N) : true <- .print("omgfail!!!!! ").
++!react(N) : true <- !do(skip); !do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
@@ -103,7 +98,7 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T);
 	!do_direction_step(X,Y).
-+!do_step : true <- .print("skipping in do step... <<<<<<<<<"); !do(skip).
++!do_step : true <- !do(skip).
 
 +!do_direction_step(X1,Y1) : pos(X2,Y2) & ((X1 < X2 & obstacle(X2-1,Y2)) |
 		(Y1 < Y2 & obstacle(X2,Y2-1)) | (X1 > X2 & obstacle(X2+1,Y2)) |

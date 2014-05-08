@@ -2,7 +2,6 @@
 	+idle;
 	?pos(Xfrom,Yfrom); ?depot(Xto,Yto);
 	?astar(Xfrom, Yfrom, Xto, Yto, Plan);
-	.print(Xfrom," ",Yfrom," ",Xto," ",Yto,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 	+moving_plan(Plan); +end_plan(Xto,Yto);
 	+carrying_gold; +carrying_wood;
 	do(skip).
@@ -49,7 +48,7 @@
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,carrying_wood); !do_step.
 	
 	
-+!react(N) : moving_plan(M) <- .print("??????????"); !do_step.
++!react(N) : moving_plan(M) <- !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
 	!tellmiddle(load_it(N+1));
 	-middle_is_waiting;
