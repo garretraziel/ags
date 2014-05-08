@@ -89,7 +89,7 @@
 	-end_plan(X,Y);
 	-have_to_unload;
 	+idle;
-	-carrying_wood; -carrying_gold;
+	+carrying_wood; +carrying_gold;
 	do(drop).
 +!react(N) : true <- do(skip).
 
