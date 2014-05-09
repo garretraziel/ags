@@ -46,14 +46,18 @@
 +!react : end_plan(X,Y) & pos(X,Y) <-
 	-end_plan(_,_); 
 	!react.
-+!react : place_to_check(_,_,_) <-
++!react : place_to_check(_,_,_) | place_to_check_forced(_,_,_)<-
 	!plan_next_point;
 	!react.
++!react : not scan_done <- +scan_done; !tellall(scan_done); !do_remaining_skip.	
 +!react : true <- !do_remaining_skip.
 
 +!plan_next_point : places_counter(C) & final(C) <- 
 	for (place_to_check(Ct,X,Y)){
 		-place_to_check(Ct,X,Y);
+	}
+	for (place_to_check_forced(Ct,X,Y)){
+		-place_to_check_forced(Ct,X,Y);
 	}
 	+scan_done;
 	!tellall(scan_done);
@@ -61,7 +65,13 @@
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
 	-+places_counter(C+1);	
 	!plan_path(X1,Y1).
-+!plan_next_point : places_counter(C) & place_to_check(_,_,_) <-
++!plan_next_point : places_counter(C) & place_to_check_forced(C,X1,Y1) <-
+	-+places_counter(C+1);	
+	!plan_path(X1,Y1).
++!plan_next_point : places_counter(C) & place_to_check(_,_,_)<-
+	-+places_counter(C+1);
+	!plan_next_point.
++!plan_next_point : places_counter(C) & place_to_check_forced(_,_,_)<-
 	-+places_counter(C+1);
 	!plan_next_point.
 +!plan_next_point : true <- +scan_done; !tellall(scan_done).
@@ -112,9 +122,9 @@
 			?counter(C);
 			-+counter(C+1);
 			if(Y mod 2 == 0){
-				+place_to_check(C,X,2*Y);
+				+place_to_check_forced(C,X,2*Y);
 			} else {
-				+place_to_check(C,Xg-X-1,2*Y);
+				+place_to_check_forced(C,Xg-X-1,2*Y);
 			}
 		}
 	};
@@ -124,15 +134,15 @@
 		+interlacing(2);
 	}
 	?interlacing(I);
-	for (.range(Y,0,(Yg-1)/2)) {
+	for (.range(Y,0,(Yg-1)/2 -1)) {
 		for (.range(X,0,Xg-1))
 		{	
 			?counter(C);
 			-+counter(C+1);
 			if(Y mod 2 == 0){
-				+place_to_check(C,X,Yg-(2*Y)-I);
+				+place_to_check_forced(C,X,Yg-(2*Y)-I);
 			} else {
-				+place_to_check(C,Xg-X-1,Yg-(2*Y)-I);
+				+place_to_check_forced(C,Xg-X-1,Yg-(2*Y)-I);
 			}
 		}
 	};
@@ -173,7 +183,8 @@
 	-place_to_check(_,X-1,Y+1);
 	-place_to_check(_,X+1,Y-1).
 
-+!update_places : pos(X,Y) <- 
++!update_places : pos(X,Y) <-
+	-place_to_check_forced(_,X,Y);
 	!update_places_pos(X,Y).
 
 +?distance(X1,Y1,X2,Y2,D) : true <- D = math.abs(X1-X2) + math.abs(Y1-Y2).
