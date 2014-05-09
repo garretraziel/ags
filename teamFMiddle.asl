@@ -81,12 +81,8 @@
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y,_) <-
 	.print("react 8");
 	-have_to_go(_,_,_);
-	-end_plan(_,_); !tellslow(i_am_ready); !react(N).	
-										//nenavidim JASON
-+!react(N) : true <- .print("react 9"); !do_remaining_skip.
-
-
-@atomicend[atomic] +!the_end : true <-
+	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
+@atomicendreact[atomic]+!react(N) : yomamaend  <-
 	.print("this is the end, tadadadaaa!");
 	+have_to_unload;
 	?pos(Xp,Yp);
@@ -95,7 +91,13 @@
 	-moving_plan(_);
 	+moving_plan(TP);
 	+end_plan(Xd,Yd);
-	!do_remaining_skip.	
+	!do_remaining_skip.
+										//nenavidim JASON
++!react(N) : true <- .print("react 9"); !do_remaining_skip.
+
+
++!the_end : true <- +yomamaend.
+		
 
 
 +obstacle(X,Y) : obs(X,Y) <- true.
