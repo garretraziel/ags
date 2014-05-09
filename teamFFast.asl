@@ -1,4 +1,3 @@
-//+step(0) : true <- ?depot(X,Y); +places_to_visit([[X,Y]]); do(skip).
 +step(0) : true <- !plan_all_ng; +places_counter(0);
 	do(skip);do(skip);do(skip).
 +step(N) : true <- ?moves_left(M); -+moves(M); !react.
@@ -60,8 +59,7 @@
 	!tellall(scan_done);
 	-final(C).
 +!plan_next_point : places_counter(C) & place_to_check(C,X1,Y1) <-
-	-+places_counter(C+1);
-	//-place_to_check(C,X1,Y1);	
+	-+places_counter(C+1);	
 	!plan_path(X1,Y1).
 +!plan_next_point : places_counter(C) & place_to_check(_,_,_) <-
 	-+places_counter(C+1);
@@ -145,7 +143,7 @@
 +!do_step : moving_plan([[X,Y]]) <- -moving_plan(_); !do_direction_step(X,Y).
 +!do_step : moving_plan([[X,Y]|T]) <- -moving_plan(_); +moving_plan(T); !do_direction_step(X,Y).
 +!do_step : scan_done <- !do_remaining_skip.
-+!do_step : true <- .print("harra harrr!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
++!do_step : true <-
 	-end_plan(_,_);
 	!plan_next_point;
 	!do_step.

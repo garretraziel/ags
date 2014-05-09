@@ -27,12 +27,6 @@
 
 
 @nav[atomic] +!react(N) : have_to_pickup(N) <-
-	.print("react 1");
-	if(g(X,Y)){
-		-g(X,Y);
-	} else {
-		-w(X,Y);
-	}
 	-have_to_pickup(N);
 	?carrying_capacity(CapMax);
 	?carrying_wood(Woods);
@@ -50,41 +44,33 @@
 	}
 	do(pick).
 +!react(N) : have_to_pickup(M) & N > M <-
-	.print("react 2");
 	-have_to_pickup(M);
 	+idle;
 	!do(skip);!do(skip).
-+!react(N) : moving_plan(M)[source(self)] <- .print("react 3"); !do_step; !do_step.
++!react(N) : moving_plan(M) <- !do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
-	.print("react 4");
 	-end_plan(X,Y);
 	-have_to_unload;
 	+idle;
 	do(drop).
 +!react(N) : idle & have_to_go(X,Y,cw) & carrying_gold(0) <-
-	.print("react 5");
 	-idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
 +!react(N) : idle & have_to_go(X,Y,cg) & carrying_wood(0) <-
-	.print("react 6");
 	-idle;
 	-moving_plan(_); -end_plan(_,_);
 	?pos(Xp,Yp); ?astar(Xp,Yp,X,Y,TP); +moving_plan(TP); +end_plan(X,Y);
 	!do_step; !do_step.
 +!react(N) : idle & have_to_go(X,Y,_) <-
-	.print("react 7");
 	+have_to_unload; ?depot(Xd,Yd); 	
 	?pos(Xp,Yp); ?astar(Xp,Yp,Xd,Yd,TP); +moving_plan(TP); +end_plan(Xd,Yd);
 	!do_step; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_go(X,Y,_) <-
-	.print("react 8");
 	-have_to_go(_,_,_);
-	-end_plan(_,_); !tellslow(i_am_ready); !react(N).	
-										//nenavidim JASON
-+!react(N) : true <- .print("react 9"); !do_remaining_skip.
-
+	-end_plan(_,_); !tellslow(i_am_ready); !react(N).
++!react(N) : true <- !do_remaining_skip.
 
 @atomicend[atomic] +!the_end : true <-
 	.print("this is the end, tadadadaaa!");

@@ -11,16 +11,13 @@
 +!middle_beacon(X,Y) : true <- -+middle_pos(X,Y).
 +!slow_beacon(_,_) : true <- true.
 
-+!react(N) : moving_plan(M) <- .print("react 1"); !do_step.
++!react(N) : moving_plan(M) <- !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & have_to_unload <-
-	.print("react 2");
 	-end_plan(X,Y);
 	-have_to_unload;
 	+idle;
 	do(drop).
 +!react(N) : idle & g(Xl,Yl) & carrying_wood(0) <- -idle;
-	.print("react 3");
-	.print("nemam zadne drevo, jdu");
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
@@ -37,10 +34,7 @@
 	-nearest(_,_,_);
 	?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cg); !do_step.
-	
 +!react(N) : idle & w(Xl,Yl) & carrying_gold(0) <- -idle;
-	.print("react 4");
-	.print("nemam zadne zlato, jdu");
 	?pos(Xp,Yp); 
 	?astar(Xp,Yp,Xl,Yl,DistPlan);
 	.length(DistPlan, Dist);
@@ -58,27 +52,23 @@
 	?astar(Xp,Yp,X,Y,TP);
 	+moving_plan(TP); +end_plan(X,Y); !inform_middle(X,Y,cw); !do_step.
 +!react(N) : idle & (w(_,_) | g(_,_)) <-
-	.print("react 5");
 	-idle;
 	?pos(Xp,Yp);
 	?depot(Xd,Yd);
 	?astar(Xp,Yp,Xd,Yd,TP);
 	+moving_plan(TP); +end_plan(Xd,Yd); +have_to_unload; !do_step.
 +!react(N) : end_plan(X,Y) & pos(X,Y) & middle_is_waiting <-
-	.print("react 6");
 	!tellmiddle(load_it(N+1));
 	-middle_is_waiting;
 	-end_plan(_,_);
 	+load;
 	do(skip).
 @react[atomic] +!react(N) : pos(X,Y) & load <-
-	.print("react 7");
 	if(g(X,Y)){
 		-g(X,Y);
 	} else {
 		-w(X,Y);
 	}
-	//hahha!
 	-load;
 	?carrying_capacity(CapMax);
 	?carrying_wood(Woods);
@@ -96,8 +86,6 @@
 	}
 	do(pick).
 +!react(N) : scan_completed & idle & (not g(_,_)) & (not w(_,_)) <-
-	.print("react 8");
-	.print("this is the end, tadadadaaa!");
 	!tellmiddle(the_end);
 	+have_to_unload;
 	?pos(Xp,Yp);
@@ -108,7 +96,7 @@
 	-end_plan(_);
 	+end_plan(Xd,Yd);
 	do(skip).
-+!react(N) : true <- .print("react 9"); do(skip).
++!react(N) : true <- do(skip).
 
 +obstacle(X,Y) : obs(X,Y) <- true.
 +obstacle(X,Y) : true <- +obs(X,Y); !tellall(add_obstacle(X,Y)).
