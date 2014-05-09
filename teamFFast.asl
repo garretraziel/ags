@@ -64,7 +64,7 @@
 +!plan_next_point : places_counter(C) & place_to_check(_,_,_) <-
 	-+places_counter(C+1);
 	!plan_next_point.
-+!plan_next_point : true <- +scan_done.
++!plan_next_point : true <- +scan_done; !tellall(scan_done).
 
 
 +!slow_beacon(X,Y) : true <- !update_places_pos(X,Y).
